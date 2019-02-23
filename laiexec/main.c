@@ -4,6 +4,15 @@
 
 #include <lai/core.h>
 
+void laihost_handle_amldebug(lai_object_t *object) {
+    if(object->type == LAI_STRING)
+        printf("amldebug: (string \"%s\")\n", object->string);
+    else if(object->type == LAI_INTEGER)
+        printf("amldebug: (integer %lu)\n", object->integer);
+    else
+        printf("amldebug: (unknown)\n");
+}
+
 int main(int argc, char **argv) {
     lai_state_t state;
 
