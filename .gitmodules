@@ -1,0 +1,3 @@
+[submodule "lai"]
+	path = subprojects/lai
+	url = https://github.com/windozz/lai.git
