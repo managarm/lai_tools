@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     printf("ACPI namespace created, total of %zd predefined objects.\n", lai_ns_size);
 
     // Execute the _SB._INI control method.
-    lai_nsnode_t *handle = acpins_resolve("\\._SB_._INI");
+    lai_nsnode_t *handle = lai_resolve("\\._SB_._INI");
     if(!handle) {
         fprintf(stderr, "could not find _SB_._INI method\n");
         abort();
