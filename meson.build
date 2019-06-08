@@ -8,7 +8,7 @@ laiexec = executable('laiexec',
         'common/laihost.c',
     dependencies: lai.get_variable('dependency'))
 
-foreach f : ['hello', 'arithmetic']
+foreach f : ['hello', 'arithmetic', 'mutex']
 	test('aml-aml_tests/' + f + '.asl', files('aml_tests/run.py'),
 		args: [laiexec, files('aml_tests/' + f + '.asl')])
 endforeach
