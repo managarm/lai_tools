@@ -90,28 +90,28 @@ def verify(expected, trace):
     for (e, t) in zip(expected, trace):
         if e.fn == 'string':
             if t.fn != 'string' or e.args[0] != t.args[0]:
-                print_bad("  * Expected {} but trace shows {}".format(e, t))
+                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
                 errors += 1
             else:
-                print_good("  * Successfully verified {}".format(e))
+                print_good("  \u2713 Verified against {}".format(e))
         elif e.fn == 'integer':
             if t.fn != 'integer' or e.args[0] != t.args[0]:
-                print_bad("  * Expected {} but trace shows {}".format(e, t))
+                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
                 errors += 1
             else:
-                print_good("  * Successfully verified {}".format(e))
+                print_good("  \u2713 Verified against {}".format(e))
         else:
             raise RuntimeError("Unexpected s-expr {}".format(e.fn));
         n += 1
 
     print_colored(bad_color if errors else good_color,
-            "  = Verified {} items, {} errors".format(n, errors))
+            "  \u276f Verified {}/{} items, {} errors".format(n, len(expected), errors))
 
     if n < len(expected):
-        print_bad("  = Less items in output than expected")
+        print_bad("  \u276f Less items in output than expected")
         return False
     elif n < len(trace):
-        print_bad("  = More items in output than expected")
+        print_bad("  \u276f More items in output than expected")
         return False
     elif errors:
         return False
@@ -146,7 +146,7 @@ laiexec = subprocess.Popen(['./' + sys.argv[1], path],
 (stdout, _) = laiexec.communicate()
 
 print_colored(bad_color if laiexec.returncode else good_color,
-        "  = laiexec returned {}, verifying trace...".format(laiexec.returncode))
+        "  \u276f laiexec returned {}, verifying trace...".format(laiexec.returncode))
 
 trace_script = ''
 for line in stdout.strip().split('\n'):
