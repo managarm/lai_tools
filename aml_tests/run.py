@@ -131,9 +131,10 @@ print("Running LAI unit test {}".format(testcase))
 expected_script = ''
 with open(sys.argv[2]) as f:
     for line in f:
-        if not line.startswith('//!'):
+        stripped = line.lstrip()
+        if not stripped.startswith('//!'):
             continue
-        expected_script += line[len('//!'):]
+        expected_script += stripped[len('//!'):]
 
 expected = Sxpr.parse(expected_script)
 
