@@ -8,8 +8,18 @@ laiexec = executable('laiexec',
         'common/laihost.c',
     dependencies: lai.get_variable('dependency'))
 
-foreach f : ['hello', 'arithmetic', 'mutex', 'event', 'power_res']
-	test('aml-aml_tests/' + f + '.asl', files('aml_tests/run.py'),
-		args: [laiexec, files('aml_tests/' + f + '.asl')])
+aml_test_cases = [
+    'arithmetic',
+    'event',
+    'hello',
+    'mutex',
+    'power_res'
+]
+
+run_py = find_program('aml_tests/run.py')
+
+foreach f : aml_test_cases
+    test('aml-aml_tests/' + f + '.asl', run_py,
+        args: [laiexec, files('aml_tests/' + f + '.asl')])
 endforeach
 
