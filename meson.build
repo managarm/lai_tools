@@ -11,6 +11,7 @@ laiexec = executable('laiexec',
 aml_test_cases = [
     'arithmetic',
     'event',
+    'index',
     'hello',
     'mutex',
     'power_res'
