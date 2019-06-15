@@ -9,6 +9,12 @@ void laihost_handle_amldebug(lai_object_t *object) {
         printf("amldebug: (string \"%s\")\n", object->string);
     else if(object->type == LAI_INTEGER)
         printf("amldebug: (integer %lu)\n", object->integer);
+    else if(object->type == LAI_STRING_INDEX)
+        printf("amldebug: (string_index)\n");
+    else if(object->type == LAI_BUFFER_INDEX)
+        printf("amldebug: (buffer_index)\n");
+    else if(object->type == LAI_PACKAGE_INDEX)
+        printf("amldebug: (package_index)\n");
     else
         printf("amldebug: (unknown)\n");
 }

@@ -42,7 +42,7 @@ class Sxpr:
             elif s[i] == '(':
                 i += 1
                 fn = ''
-                while s[i].isalpha():
+                while s[i].isalpha() or s[i] == '_':
                     fn += s[i]
                     i += 1
                 stack.append(Sxpr(fn))
@@ -69,6 +69,7 @@ class Sxpr:
                 stack[-1].args.append(x)
             else:
                 raise RuntimeError("Unexpected character {} in s-expr".format(s[i]))
+        assert not stack
         return res
 
     def __init__(self, fn):
@@ -96,6 +97,12 @@ def verify(expected, trace):
                 print_good("  \u2713 Verified against {}".format(e))
         elif e.fn == 'integer':
             if t.fn != 'integer' or e.args[0] != t.args[0]:
+                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
+                errors += 1
+            else:
+                print_good("  \u2713 Verified against {}".format(e))
+        elif e.fn == 'string_index' or e.fn == 'buffer_index' or e.fn == 'package_index':
+            if t.fn != e.fn:
                 print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
                 errors += 1
             else:
