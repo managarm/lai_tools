@@ -1,8 +1,12 @@
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <lai/core.h>
+
+static bool enable_trace = false;
 
 void laihost_handle_amldebug(lai_object_t *object) {
     if(object->type == LAI_STRING)
@@ -22,8 +26,33 @@ void laihost_handle_amldebug(lai_object_t *object) {
 int main(int argc, char **argv) {
     lai_state_t state;
 
+    argv += 1; // Skip the program name.
+    while(*argv) {
+        if((*argv)[0] != '-')
+            break;
+        if(!strcmp(*argv, "--trace")) {
+            enable_trace = true;
+            argv++;
+        }else{
+            printf("unexpected argument %s\n", *argv);
+            exit(2);
+        }
+    }
+
+    // Recompute argc.
+    for(argc = 0; argv[argc]; argc++)
+        ;
+    if(!argc) {
+        printf("expected exactly one positional argument\n");
+        exit(2);
+    }
+
     // Quick and dirty way to read the entire input file.
-    FILE *f = fopen(argv[1], "rb");
+    FILE *f = fopen(argv[0], "rb");
+    if(!f) {
+        printf("could not open input file\n");
+        exit(1);
+    }
     fseek(f, 0, SEEK_END);
     long size = ftell(f);
     fseek(f, 0, SEEK_SET);
@@ -33,6 +62,9 @@ int main(int argc, char **argv) {
     fclose(f);
 
     // Load the AML table and initialize the namespace.
+    if(enable_trace)
+        lai_enable_tracing(1);
+
     acpi_aml_t *table = buffer;
     lai_init_state(&state);
     lai_populate(NULL, table->data, table->header.length - sizeof(acpi_header_t), &state);
@@ -44,7 +76,7 @@ int main(int argc, char **argv) {
     lai_nsnode_t *handle = lai_resolve("\\._SB_._INI");
     if(!handle) {
         fprintf(stderr, "could not find _SB_._INI method\n");
-        abort();
+        exit(1);
     }
 
     lai_init_state(&state);
