@@ -5,11 +5,11 @@
 #include <lai/host.h>
 
 void laihost_log(int level, const char *str) {
-    printf("%s", str);
+    printf("%s\n", str);
 }
 
 void laihost_panic(const char *str) {
-    printf("%s", str);
+    printf("%s\n", str);
     abort();
 }
 
