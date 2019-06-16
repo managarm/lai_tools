@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -125,7 +126,7 @@ def verify(expected, trace):
     return True
 
 testcase = os.path.basename(sys.argv[2])
-print("Running LAI unit test {}".format(testcase))
+print("Running AML unit test {}".format(testcase))
 
 # Extract the expected output from comments in the ASL file.
 expected_script = ''
@@ -153,8 +154,20 @@ laiexec = subprocess.Popen(['./' + sys.argv[1], path],
 
 (stdout, _) = laiexec.communicate()
 
+message = 'success'
+if laiexec.returncode < 0:
+	# Some signals have multiple names. Prefer a certain one.
+	common_signames = {
+		signal.SIGABRT: 'SIGABRT'
+	}
+
+	signo = -laiexec.returncode
+	message = common_signames.get(signo, signal.Signals(signo).name)
+elif laiexec.returncode:
+	message = 'failure ({})'.format(laiexec.returncode)
+
 print_colored(bad_color if laiexec.returncode else good_color,
-        "  \u276f laiexec returned {}, verifying trace...".format(laiexec.returncode))
+        "  \u276f laiexec returned {}, verifying trace...".format(message))
 
 trace_script = ''
 for line in stdout.strip().split('\n'):
