@@ -6,8 +6,8 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
         Method(_INI)
         {
 			NAME(STR, "Foo")
-			NAME(BUF, Buffer{0xBE, 0xEF})
-			NAME(PKG, Package{0xBE, 0xEF})
+			NAME(BUF, Buffer(2){0xBE, 0xEF})
+			NAME(PKG, Package(2){0xBE, 0xEF})
 
 			// Index() is supposed to handle names.
 			//! (string_index)
@@ -21,9 +21,9 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 			//! (string_index)
             Debug = Index("Bar", 0)
 			//! (buffer_index)
-			Debug = Index(Buffer{0xBA, 0xBE}, 0)
+			Debug = Index(Buffer(2){0xBA, 0xBE}, 0)
 			//! (package_index)
-			Debug = Index(Package{0xBA, 0xBE}, 0)
+			Debug = Index(Package(2){0xBA, 0xBE}, 0)
         }
     }
 }
