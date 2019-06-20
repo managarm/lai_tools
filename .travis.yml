@@ -1,0 +1,29 @@
+
+language: c
+os: linux
+dist: xenial
+addons:
+    apt:
+        packages:
+          - acpica-tools
+          - ninja-build
+          - python3-pip
+          - python3-setuptools
+
+before_install:
+  - pip3 install --user --upgrade pip
+  - pip3 install --user meson
+  - pip3 install --user cpp-coveralls
+
+install:
+  - mkdir build && cd build
+  - meson -Db_coverage=true .. && ninja
+
+script:
+  - meson test -v
+
+after_success:
+   # Deploy to coveralls.io
+  - cd ..
+  - coveralls -r . -b build/ --gcov-options '\-lp' --exclude meson-private
+
