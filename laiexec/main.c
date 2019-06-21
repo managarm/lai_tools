@@ -61,19 +61,42 @@ void *laihost_scan(char *name, size_t index) {
     return buffer;
 }
 
-void laihost_handle_amldebug(lai_object_t *object) {
+static void print_lai_object(lai_object_t *object) {
     if(object->type == LAI_STRING)
-        printf("amldebug: (string \"%s\")\n", object->string);
+        printf("(string \"%s\")", object->string);
     else if(object->type == LAI_INTEGER)
-        printf("amldebug: (integer %lu)\n", object->integer);
+        printf("(integer %lu)", object->integer);
     else if(object->type == LAI_STRING_INDEX)
-        printf("amldebug: (string_index)\n");
+        printf("(string_index)");
     else if(object->type == LAI_BUFFER_INDEX)
-        printf("amldebug: (buffer_index)\n");
+        printf("(buffer_index)");
     else if(object->type == LAI_PACKAGE_INDEX)
-        printf("amldebug: (package_index)\n");
+        printf("(package_index)");
+    else if(object->type == LAI_BUFFER) {
+        printf("(buffer");
+        for(int i = 0; i < object->buffer_size; i++) {
+            printf(" 0x%02hhX", ((char*)(object->buffer))[i]);
+        }
+        printf(")");
+    }
+    else if(object->type == LAI_PACKAGE) {
+        printf("(package");
+        for(int i = 0; i < object->pkg_ptr->size; i++) {
+            printf(" ");
+            print_lai_object(&object->pkg_ptr->elems[i]);
+        }
+        printf(")");
+    }
+    else if(object->type == 0)
+        printf("(uninitialized)");
     else
-        printf("amldebug: (unknown)\n");
+        printf("(unknown %u)", object->type);
+}
+
+void laihost_handle_amldebug(lai_object_t *object) {
+    printf("amldebug: ");
+    print_lai_object(object);
+    printf("\n");
 }
 
 int main(int argc, char **argv) {
