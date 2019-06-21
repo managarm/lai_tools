@@ -14,10 +14,12 @@ run_py = find_program('aml_tests/run.py')
 
 aml_test_cases = [
     'arithmetic',
+    'computational_data',
     'event',
     'index',
     'hello',
     'mutex',
+    'package',
     'power_res'
 ]
 
