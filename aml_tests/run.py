@@ -62,14 +62,22 @@ class Sxpr:
                     i += 1
                 i += 1
                 stack[-1].args.append(x)
-            elif s[i] in '0123456789':
+            elif s[i].isdigit():
                 x = 0
-                while s[i] in '0123456789':
-                    x = x * 10 + int(s[i])
+                base = 10
+                if s[i] == '0' and not s[i + 1].isdigit():
+                    if s[i + 1] == 'x':
+                        base = 16
+                        i += 2
+                    elif s[i + 1] == 'b':
+                        base = 2
+                        i += 2
+                while s[i].lower() in '0123456789abcdef'[:base]:
+                    x = x * base + int(s[i].lower(), base)
                     i += 1
                 stack[-1].args.append(x)
             else:
-                raise RuntimeError("Unexpected character {} in s-expr".format(s[i]))
+                raise RuntimeError("Unexpected character {} in s-expr ({})".format(s[i], s[i:]))
         assert not stack
         return res
 
@@ -86,30 +94,71 @@ class Sxpr:
                 arg_strs.append(str(arg))
         return '(' + self.fn + (' ' + ' '.join(arg_strs) if arg_strs else '') + ')'
 
+def first_arg_equals(e, t):
+    """
+    Return true if the first args are equal in both
+    """
+    return e.args[0] == t.args[0]
+
+def type_equals(e, t):
+    """
+    Will always return true, assuming the types of 
+    both are equal (which is checked in compare_object)
+    """
+    return True
+
+def package_comparison(e, t):
+    """
+    Will just compare the objects inside of the package
+    """
+    if len(e.args) != len(t.args):
+        return False
+    for a1, a2 in zip(e.args, t.args):
+        if not compare_object(a1, a2):
+            return False
+    return True
+
+def buffer_comparison(e, t):
+    """
+    Will compare the elements inside the buffers
+    """
+    if len(e.args) != len(t.args):
+        return False
+    for a1, a2 in zip(e.args, t.args):
+        if a1 != a2:
+            return False
+    return True
+
+# Table to quickly lookup the comparison to run
+COMPARISON_TABLE = {
+    'uninitialized': type_equals, 
+    'integer': first_arg_equals,
+    'string': first_arg_equals,
+    'buffer': buffer_comparison, 
+    'string_index': type_equals,
+    'buffer_index': type_equals,
+    'package_index': type_equals,
+    'package': package_comparison
+}
+
+def compare_object(e, t):
+    """
+    Will make sure both types match and will run
+    the correct comparison for them
+    """
+    if e.fn not in COMPARISON_TABLE:
+        raise RuntimeError("Unexpected s-expr {}".format(e.fn))
+    return e.fn == t.fn and COMPARISON_TABLE[e.fn](e, t)
+
 def verify(expected, trace):
     n = 0
     errors = 0
     for (e, t) in zip(expected, trace):
-        if e.fn == 'string':
-            if t.fn != 'string' or e.args[0] != t.args[0]:
-                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
-                errors += 1
-            else:
-                print_good("  \u2713 Verified against {}".format(e))
-        elif e.fn == 'integer':
-            if t.fn != 'integer' or e.args[0] != t.args[0]:
-                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
-                errors += 1
-            else:
-                print_good("  \u2713 Verified against {}".format(e))
-        elif e.fn == 'string_index' or e.fn == 'buffer_index' or e.fn == 'package_index':
-            if t.fn != e.fn:
-                print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
-                errors += 1
-            else:
-                print_good("  \u2713 Verified against {}".format(e))
+        if not compare_object(e, t):
+            print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
+            errors += 1
         else:
-            raise RuntimeError("Unexpected s-expr {}".format(e.fn));
+            print_good("  \u2713 Verified against {}".format(e))
         n += 1
 
     print_colored(bad_color if errors else good_color,
