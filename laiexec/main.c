@@ -63,7 +63,7 @@ void *laihost_scan(char *name, size_t index) {
 
 static void print_lai_object(lai_object_t *object) {
     if(object->type == LAI_STRING)
-        printf("(string \"%s\")", object->string);
+        printf("(string \"%s\")", object->string_ptr->content);
     else if(object->type == LAI_INTEGER)
         printf("(integer %lu)", object->integer);
     else if(object->type == LAI_STRING_INDEX)
@@ -74,8 +74,8 @@ static void print_lai_object(lai_object_t *object) {
         printf("(package_index)");
     else if(object->type == LAI_BUFFER) {
         printf("(buffer");
-        for(int i = 0; i < object->buffer_size; i++) {
-            printf(" 0x%02hhX", ((char*)(object->buffer))[i]);
+        for(int i = 0; i < object->buffer_ptr->size; i++) {
+            printf(" 0x%02hhX", object->buffer_ptr->content[i]);
         }
         printf(")");
     }
