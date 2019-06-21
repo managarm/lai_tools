@@ -1,11 +1,13 @@
 
-project('lai_tools', 'c')
+project('lai_tools', 'c',
+    default_options: ['c_std=c99'])
 
 lai = subproject('lai')
 
 laiexec = executable('laiexec',
         'laiexec/main.c',
         'common/laihost.c',
+    c_args: ['-D_GNU_SOURCE'],
     dependencies: lai.get_variable('dependency'))
 
 run_py = find_program('aml_tests/run.py')
