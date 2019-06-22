@@ -19,8 +19,7 @@ aml_test_cases = [
     'index',
     'hello',
     'mutex',
-# Disable failing tests for now so that we can test coverage information.
-#   'package',
+    'package',
     'power_res'
 ]
 

@@ -1,7 +1,7 @@
 
 //! (package (uninitialized))
-//! (package (integer 0xABCD0004) (string "12340002") (buffer 0xAA 0xBB 0xCC 0xDD))
-//! (package (package (integer 0xABCD0004) (string "12340002") (buffer 0xAA 0xBB 0xCC 0xDD)) (package (uninitialized)))
+//! (package (integer 0xABCD0004) (string "test") (buffer 0xAA 0xBB 0xCC 0xDD))
+//! (package (package (integer 0xABCD0004) (string "test") (buffer 0xAA 0xBB 0xCC 0xDD)) (package (uninitialized)))
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {
