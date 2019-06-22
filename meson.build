@@ -22,11 +22,12 @@ aml_test_cases = [
     'mutex',
     'package',
     'power_res',
-    'scopes'
+    'scopes',
 ]
 
 aml_regression_cases = [
-    'qookie_deref_index'
+    'qookie_deref_index',
+    'qookie_store_index',
 ]
 
 foreach f : aml_test_cases
