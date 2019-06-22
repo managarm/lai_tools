@@ -20,7 +20,8 @@ aml_test_cases = [
     'hello',
     'mutex',
     'package',
-    'power_res'
+    'power_res',
+    'scopes'
 ]
 
 aml_regression_cases = [
