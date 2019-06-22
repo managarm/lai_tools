@@ -1,7 +1,7 @@
 
-// abs tests
-//! (integer 123456)
-//! (integer 123456)
+// absd tests
+//! (integer 333)
+//! (integer 333)
 
 // sqrt tests, not working :(
 // (integer 12)
@@ -25,17 +25,16 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
     Scope(_SB)
     {
 
-        // Calculate abstract
-        Method(ABS, 1)
+        // Calculate absolute difference
+        Method(ABSD, 2)
         {
-            If(Arg0 > 0) 
+            If(Arg0 > Arg1) 
             {
-                Return (Arg0)
+                Return (Arg0 - Arg1)
             }
             Else 
             {
-                Arg0 = 0 - Arg0
-                Return (Arg0)
+                Return (Arg1 - Arg0)
             }
         }
 
@@ -48,7 +47,7 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             NMBR = Arg0
             N1 = (((N + NMBR) / N) >> 1)
             
-            While(ABS(N1 - N) > 1) 
+            While(ABSD(N1, N) > 1)
             {
                 N = N1
                 N1 = (((N + NMBR) / N) >> 1)
@@ -93,8 +92,8 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 
         Method(_INI)
         {
-			Debug = ABS(123456)
-			Debug = ABS(0 - 123456)
+            Debug = ABSD(123, 456)
+            Debug = ABSD(456, 123)
 
             //Debug = SQRT(144)
             //Debug = SQRT(25)
