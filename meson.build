@@ -26,6 +26,7 @@ aml_test_cases = [
 ]
 
 aml_regression_cases = [
+    'itay_buffer_resolution',
     'qookie_deref_index',
     'qookie_store_index',
 ]
