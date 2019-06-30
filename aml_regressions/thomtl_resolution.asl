@@ -4,7 +4,7 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
     {
 		OperationRegion (LPCS, SystemMemory, 0, 0x0500)
 		Device (HPET) {
-			Field (LPCS, DWordAcc, Lock, Preserve) {
+			Field (\_SB.LPCS, DWordAcc, Lock, Preserve) {
 				Offset (0x328),
 				HBAS,   32
 			}
