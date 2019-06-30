@@ -138,12 +138,14 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
+        lai_nsnode_t *root_node = lai_create_root();
+
         struct lai_aml_segment amls;
         memset(&amls, 0, sizeof(struct lai_aml_segment));
         amls.table = buffer;
 
         lai_init_state(&state);
-        lai_populate(NULL, &amls, &state);
+        lai_populate(root_node, &amls, &state);
         lai_finalize_state(&state);
         printf("ACPI namespace created, total of %zd predefined objects.\n", lai_ns_size);
 
