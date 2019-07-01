@@ -23,6 +23,8 @@ aml_test_cases = [
     'package',
     'power_res',
     'scopes',
+    'field',
+    'indexfield',
 ]
 
 aml_regression_cases = [
