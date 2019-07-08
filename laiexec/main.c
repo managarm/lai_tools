@@ -61,7 +61,7 @@ void *laihost_scan(char *name, size_t index) {
     return buffer;
 }
 
-static void print_lai_object(lai_object_t *object) {
+static void print_lai_object(lai_variable_t *object) {
     if(object->type == LAI_STRING)
         printf("(string \"%s\")", object->string_ptr->content);
     else if(object->type == LAI_INTEGER)
@@ -93,7 +93,7 @@ static void print_lai_object(lai_object_t *object) {
         printf("(unknown %u)", object->type);
 }
 
-void laihost_handle_amldebug(lai_object_t *object) {
+void laihost_handle_amldebug(lai_variable_t *object) {
     printf("amldebug: ");
     print_lai_object(object);
     printf("\n");
