@@ -22,6 +22,7 @@ aml_test_cases = [
     'mutex',
     'package',
     'power_res',
+    'processor',
     'scopes',
     'field',
     'indexfield',
