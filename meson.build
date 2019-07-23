@@ -26,6 +26,7 @@ aml_test_cases = [
     'scopes',
     'field',
     'indexfield',
+    'bankfield',
 ]
 
 aml_regression_cases = [
