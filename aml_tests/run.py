@@ -102,7 +102,7 @@ def first_arg_equals(e, t):
 
 def type_equals(e, t):
     """
-    Will always return true, assuming the types of 
+    Will always return true, assuming the types of
     both are equal (which is checked in compare_object)
     """
     return True
@@ -131,10 +131,10 @@ def buffer_comparison(e, t):
 
 # Table to quickly lookup the comparison to run
 COMPARISON_TABLE = {
-    'uninitialized': type_equals, 
+    'uninitialized': type_equals,
     'integer': first_arg_equals,
     'string': first_arg_equals,
-    'buffer': buffer_comparison, 
+    'buffer': buffer_comparison,
     'string_index': type_equals,
     'buffer_index': type_equals,
     'package_index': type_equals,
@@ -155,20 +155,20 @@ def verify(expected, trace):
     errors = 0
     for (e, t) in zip(expected, trace):
         if not compare_object(e, t):
-            print_bad("  \u2717 Expected {} but trace shows {}".format(e, t))
+            print_bad(" -> Expected {} but trace shows {}".format(e, t))
             errors += 1
         else:
-            print_good("  \u2713 Verified against {}".format(e))
+            print_good(" -> Verified against {}".format(e))
         n += 1
 
     print_colored(bad_color if errors else good_color,
-            "  \u276f Verified {}/{} items, {} errors".format(n, len(expected), errors))
+            " -> Verified {}/{} items, {} errors".format(n, len(expected), errors))
 
     if n < len(expected):
-        print_bad("  \u276f Less items in output than expected")
+        print_bad(" -> Less items in output than expected")
         return False
     elif n < len(trace):
-        print_bad("  \u276f More items in output than expected")
+        print_bad(" -> More items in output than expected")
         return False
     elif errors:
         return False
@@ -216,7 +216,7 @@ elif laiexec.returncode:
 	message = 'failure ({})'.format(laiexec.returncode)
 
 print_colored(bad_color if laiexec.returncode else good_color,
-        "  \u276f laiexec returned {}, verifying trace...".format(message))
+        " -> laiexec returned {}, verifying trace...".format(message))
 
 trace_script = ''
 for line in stdout.strip().split('\n'):
