@@ -18,3 +18,16 @@ $ meson ..
 $ ninja
 $ meson test -v # Run tests and see test output.
 ```
+
+## Bootable image
+
+It is possible to generate a bootable image containing LAI in order to test it on real hardware.
+
+```
+$ cd boot_image
+$ ./build.sh
+```
+
+A bootable file called `boot.hdd` should be created in the `boot_image` directory.
+Test it in QEMU or any other virtualisation solution, or write it onto a drive
+(e.g.: a USB stick) by means of `cat` or `dd`.
