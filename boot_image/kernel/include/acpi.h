@@ -39,6 +39,12 @@ typedef struct {
     uint64_t sdt_ptr[];
 } __attribute__((packed)) xsdt_t;
 
+typedef struct {
+    acpi_sdt_t sdt;
+    uint32_t lapic_addr;
+    uint32_t flags;
+} __attribute__((packed)) madt_t;
+
 
 extern rsdp_t *rsdp;
 extern rsdt_t *rsdt;

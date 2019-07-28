@@ -97,6 +97,15 @@ rsdp_found:
         rsdt = (rsdt_t *)(size_t)(rsdp->rsdt_addr + MEM_PHYS_OFFSET);
     }
 
+    madt_t *madt;
+    // If there isn't a MADT there also shouldn't be any APICs so the PIC should just exist
+    if ((madt = acpi_find_sdt("APIC", 0))) {
+        if(!(madt->flags & (1 << 0))){
+            // PCAT_COMPAT isn't set so there aren't any PICs
+            panic("No PIC detected", 0);
+        }
+    }
+
     int sci_irq = acpi_get_sci_irq();
     kprint(KPRN_DBG, "acpi: SCI IRQ = %x", sci_irq);
     idt_register_handler(sci_irq + 0x20, 0b10001110, 0, sci_handler_isr);
