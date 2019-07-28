@@ -147,7 +147,8 @@ int main(int argc, char **argv) {
         lai_init_state(&state);
         lai_populate(root_node, &amls, &state);
         lai_finalize_state(&state);
-        printf("ACPI namespace created, total of %zd predefined objects.\n", lai_ns_size);
+        printf("ACPI namespace created, total of %zd predefined objects.\n",
+                lai_current_instance()->ns_size);
 
         // Execute the _SB._INI control method.
         lai_nsnode_t *handle = lai_resolve_path(NULL, "\\_SB_._INI");
