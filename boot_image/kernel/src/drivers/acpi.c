@@ -1,10 +1,14 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <acpi.h>
 #include <kernel.h>
 #include <klib.h>
 #include <panic.h>
 #include <acpi.h>
 #include <mm.h>
+#include <system.h>
+#include <acpispec/tables.h>
+#include <lai/helpers/sci.h>
 
 rsdp_t *rsdp;
 rsdt_t *rsdt;
@@ -43,6 +47,27 @@ void *acpi_find_sdt(const char *signature, int index) {
     return (void *)0;
 }
 
+int acpi_get_sci_irq(void) {
+    acpi_fadt_t *fadt;
+    if ((fadt = acpi_find_sdt("FACP", 0))) {
+        return fadt->sci_irq;
+    } else {
+        return -1;
+    }
+}
+
+void sci_handler_isr(void);
+void sci_handler(void) {
+    uint16_t ev = lai_get_sci_event();
+
+    const char *ev_name = "?";
+    if (ev & ACPI_POWER_BUTTON) ev_name = "power button";
+    if (ev & ACPI_SLEEP_BUTTON) ev_name = "sleep button";
+    if (ev & ACPI_WAKE) ev_name = "sleep wake up";
+
+    kprint(KPRN_INFO, "acpi: a SCI event has occured: %x (%s)", ev, ev_name);
+}
+
 void init_acpi(void) {
     kprint(KPRN_INFO, "ACPI: Initialising...");
 
@@ -71,6 +96,11 @@ rsdp_found:
         kprint(KPRN_INFO, "acpi: Found RSDT at %X", (uint32_t)rsdp->rsdt_addr + MEM_PHYS_OFFSET);
         rsdt = (rsdt_t *)(size_t)(rsdp->rsdt_addr + MEM_PHYS_OFFSET);
     }
+
+    int sci_irq = acpi_get_sci_irq();
+    kprint(KPRN_DBG, "acpi: SCI IRQ = %x", sci_irq);
+    idt_register_handler(sci_irq + 0x20, 0b10001110, 0, sci_handler_isr);
+    pic_enable_irq(sci_irq);
 
     return;
 }

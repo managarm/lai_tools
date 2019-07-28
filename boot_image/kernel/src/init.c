@@ -41,18 +41,18 @@ void kernel_init(void) {
     kprint(KPRN_INFO, "PIC: Remapping legacy PIC...");
     flush_irqs();
     map_PIC(0x20, 0x28);
-    /* mask all PIC IRQs */
-    set_PIC0_mask(0b11111110);
-    set_PIC1_mask(0b11111111);
+    /* Mask all IRQs */
+    set_PIC_mask(-1);
+    /* Enable PIC0 cascade */
+    pic_enable_irq(2);
+    /* Enable IRQ0 (PIT) */
+    pic_enable_irq(0);
 
     /* set PIT frequency */
     set_pit_freq(KRNL_PIT_FREQ);
 
     /* Enable LAI tracing */
     lai_enable_tracing(1);
-
-    /* Initialise PCI */
-    /* TODO */
 
     /* initialise ACPI */
     init_acpi();

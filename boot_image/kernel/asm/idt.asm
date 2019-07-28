@@ -41,6 +41,21 @@ section .text
 
 bits 64
 
+global idt_register_handler
+idt_register_handler:
+    ; RDI = vector
+    ; RSI = type
+    ; RDX = IST
+    ; RCX = handler address
+    push rbx
+    mov dh, dl
+    mov dl, sil
+    mov rbx, rcx
+    mov cx, 0x08
+    call make_entry
+    pop rbx
+    ret
+
 make_entry:
 ; RBX = address
 ; CX = selector

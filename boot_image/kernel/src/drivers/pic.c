@@ -26,6 +26,23 @@ void map_PIC(uint8_t PIC0Offset, uint8_t PIC1Offset) {
 	set_PIC1_mask(mask1);
 }
 
+uint16_t get_PIC_mask(void) {
+    uint16_t mask = (uint16_t)get_PIC0_mask();
+    mask |= (uint16_t)get_PIC1_mask() << 8;
+    return mask;
+}
+
+void set_PIC_mask(uint16_t mask) {
+    set_PIC0_mask((uint8_t)mask);
+    set_PIC1_mask((uint8_t)(mask >> 8));
+}
+
+void pic_enable_irq(int irq) {
+    uint16_t mask = get_PIC_mask();
+    mask &= ~(1 << irq);
+    set_PIC_mask(mask);
+}
+
 void set_PIC0_mask(uint8_t mask) {
     port_out_b(0x21, mask);
     return;

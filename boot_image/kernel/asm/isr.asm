@@ -61,6 +61,7 @@ global handler_virtualisation_exception
 global handler_security_exception
 ; ... misc
 global irq0_handler
+global sci_handler_isr
 
 ; CPU exception handlers
 extern except_div0
@@ -87,6 +88,7 @@ extern except_security_exception
 
 ; misc external references
 extern timer_interrupt
+extern sci_handler
 
 section .text
 
@@ -224,5 +226,14 @@ irq0_handler:
         call timer_interrupt
         mov al, 0x20    ; acknowledge interrupt to PIC0
         out 0x20, al
+        popam
+        iretq
+
+sci_handler_isr:
+        pusham
+        call sci_handler
+        mov al, 0x20
+        out 0x20, al
+        out 0xa0, al
         popam
         iretq
