@@ -28,7 +28,9 @@ else ifeq ($(DEBUG), vga)
 CHARDFLAGS := $(CHARDFLAGS) -D_KERNEL_VGA_OUTPUT_
 endif
 
-CLINKFLAGS = -nostdlib
+CLINKFLAGS := \
+    -no-pie \
+    -nostdlib
 
 CFLAGS = -Wall -Wextra -O2
 
