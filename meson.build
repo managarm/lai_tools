@@ -16,6 +16,7 @@ aml_test_cases = [
     'arithmetic',
     'bufferfields',
     'breakpoint',
+    'calls',
     'computational_data',
     'event',
     'index',
