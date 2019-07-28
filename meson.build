@@ -23,6 +23,7 @@ aml_test_cases = [
     'package',
     'power_res',
     'processor',
+    'references',
     'scopes',
     'field',
     'indexfield',
