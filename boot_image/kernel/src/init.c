@@ -5,13 +5,13 @@
 #include <cio.h>
 #include <system.h>
 #include <panic.h>
-#include <graphics.h>
 #include <acpi.h>
 #include <e820.h>
 #include <vga_textmode.h>
-#include <vbe_tty.h>
 #include <pci.h>
 #include <system.h>
+#include <lai/core.h>
+#include <lai/helpers/sci.h>
 
 void flush_irqs(void);
 
@@ -29,13 +29,6 @@ void kernel_init(void) {
     init_e820();
 
     init_pmm();
-
-    /* initialise graphics mode */
-    init_graphics();
-
-    #ifdef _KERNEL_VGA_OUTPUT_
-        init_vbe_tty();
-    #endif
 
     kprint(KPRN_INFO, "PIC: Remapping legacy PIC...");
     flush_irqs();
