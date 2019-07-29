@@ -2,10 +2,10 @@ DEBUG = off
 
 CC = gcc
 
-C_FILES = $(shell find src -type f -name '*.c')
-H_FILES = $(shell find . -type f -name '*.h')
-ASM_FILES = $(shell find asm -type f -name '*.asm') $(shell find startup -type f -name '*.asm')
-REAL_FILES = $(shell find blobs -type f -name '*.real')
+C_FILES = $(shell find -L src -type f -name '*.c')
+H_FILES = $(shell find -L . -type f -name '*.h')
+ASM_FILES = $(shell find -L asm -type f -name '*.asm') $(shell find -L startup -type f -name '*.asm')
+REAL_FILES = $(shell find -L blobs -type f -name '*.real')
 OBJ = $(C_FILES:.c=.o) $(ASM_FILES:.asm=.o)
 BINS = $(REAL_FILES:.real=.bin)
 

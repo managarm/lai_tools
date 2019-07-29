@@ -4,4 +4,3 @@ build
 *.bin
 *.elf
 boot_image/boot.hdd
-boot_image/kernel/src/lai
