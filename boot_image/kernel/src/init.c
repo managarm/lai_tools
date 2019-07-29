@@ -29,7 +29,6 @@ void kernel_init(void) {
     init_e820();
 
     init_pmm();
-    init_vmm();
 
     /* initialise graphics mode */
     init_graphics();

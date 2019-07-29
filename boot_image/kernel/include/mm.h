@@ -24,27 +24,4 @@ void *pmm_allocz(size_t);
 void pmm_free(void *, size_t);
 void init_pmm(void);
 
-int map_page(struct pagemap_t *, size_t, size_t, size_t);
-int unmap_page(struct pagemap_t *, size_t);
-int remap_page(struct pagemap_t *, size_t, size_t);
-void init_vmm(void);
-
-#define invlpg(addr) ({ \
-    asm volatile ( \
-        "invlpg [rbx];" \
-        : \
-        : "b" (addr) \
-    ); \
-})
-
-#define load_cr3(NEW_CR3) ({ \
-    asm volatile ("mov cr3, rax;" : : "a" (NEW_CR3)); \
-})
-
-#define read_cr3() ({ \
-    size_t cr3; \
-    asm volatile ("mov rax, cr3;" : "=a" (cr3)); \
-    cr3; \
-})
-
 #endif
