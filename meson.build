@@ -19,6 +19,7 @@ aml_test_cases = [
     'calls',
     'computational_data',
     'event',
+    'implicit',
     'index',
     'hello',
     'mutex',
