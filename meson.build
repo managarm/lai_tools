@@ -32,6 +32,7 @@ aml_test_cases = [
     'indexfield',
     'bankfield',
     'tobuffer',
+    'todecimalstring',
     'tostring'
 ]
 
