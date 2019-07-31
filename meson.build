@@ -31,6 +31,7 @@ aml_test_cases = [
     'field',
     'indexfield',
     'bankfield',
+    'tobuffer'
 ]
 
 aml_regression_cases = [
