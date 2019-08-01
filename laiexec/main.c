@@ -145,7 +145,10 @@ int main(int argc, char **argv) {
         amls.table = buffer;
 
         lai_init_state(&state);
-        lai_populate(root_node, &amls, &state);
+        if (lai_populate(root_node, &amls, &state)) {
+            printf("Execution failure in table-level code");
+            exit(1);
+        }
         lai_finalize_state(&state);
         printf("ACPI namespace created, total of %zd predefined objects.\n",
                 lai_current_instance()->ns_size);
@@ -159,7 +162,10 @@ int main(int argc, char **argv) {
 
         lai_init_state(&state);
         printf("Executing _SB_._INI\n");
-        lai_eval(NULL, handle, &state);
+        if (lai_eval(NULL, handle, &state)) {
+            printf("Execution failure in _SB_._INI");
+            exit(1);
+        }
         printf("Execution finished successfully\n");
         lai_finalize_state(&state);
     }else{
