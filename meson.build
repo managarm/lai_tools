@@ -15,6 +15,7 @@ run_py = find_program('aml_tests/run.py')
 aml_test_cases = [
     'arithmetic',
     'bufferfields',
+    'frombcd',
     'breakpoint',
     'calls',
     'computational_data',
