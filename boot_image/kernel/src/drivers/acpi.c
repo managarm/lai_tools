@@ -9,6 +9,7 @@
 #include <system.h>
 #include <acpispec/tables.h>
 #include <lai/helpers/sci.h>
+#include <lai/drivers/ec.h>
 
 rsdp_t *rsdp;
 rsdt_t *rsdt;
@@ -112,4 +113,30 @@ rsdp_found:
     pic_enable_irq(sci_irq);
 
     return;
+}
+
+void acpi_init_ec(void){
+    LAI_CLEANUP_STATE lai_state_t state;
+    lai_init_state(&state);
+
+    LAI_CLEANUP_VAR lai_variable_t pnp_id = LAI_VAR_INITIALIZER;
+    lai_eisaid(&pnp_id, ACPI_EC_PNP_ID);
+
+    struct lai_ns_iterator it = LAI_NS_ITERATOR_INITIALIZER;
+    lai_nsnode_t *node;
+    while((node = lai_ns_iterate(&it))){
+        if(lai_check_device_pnp_id(node, &pnp_id, &state)) // This is not an EC
+            continue;
+
+        // Found one
+        struct lai_ec_driver *driver = kalloc(sizeof(struct lai_ec_driver)); // Dynamically allocate the memory since -
+        lai_init_ec(node, driver);                                           // we dont know how many ECs there could be
+
+        struct lai_ns_child_iterator child_it = LAI_NS_CHILD_ITERATOR_INITIALIZER(node);
+        lai_nsnode_t *child_node;
+        while((child_node = lai_ns_child_iterate(&child_it))){
+            if(lai_ns_get_node_type(child_node) == LAI_NODETYPE_OPREGION)
+                lai_ns_override_opregion(child_node, &lai_ec_opregion_override, driver);
+        }
+    }
 }

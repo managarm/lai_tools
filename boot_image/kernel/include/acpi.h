@@ -53,5 +53,6 @@ extern xsdt_t *xsdt;
 void init_acpi(void);
 void *acpi_find_sdt(const char *, int);
 int acpi_get_sci_irq(void);
+void acpi_init_ec(void);
 
 #endif

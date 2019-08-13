@@ -53,6 +53,9 @@ void kernel_init(void) {
 
     /* Enable LAI */
     lai_create_namespace();
+
+    acpi_init_ec();
+
     lai_enable_acpi(0);
 
     kprint(0, "kernel init done");
