@@ -112,6 +112,8 @@ rsdp_found:
     idt_register_handler(sci_irq + 0x20, 0b10001110, 0, sci_handler_isr);
     pic_enable_irq(sci_irq);
 
+    lai_set_acpi_revision(rsdp->rev);
+    
     return;
 }
 
