@@ -5,7 +5,6 @@
 #include <prompt.h>
 
 void panic(const char *msg, int code) {
-    DISABLE_INTERRUPTS;
     kprint(KPRN_ERR, "!!! KERNEL PANIC !!!");
     kprint(KPRN_ERR, "Panic info: %s", msg);
     kprint(KPRN_ERR, "Error code: %X", (size_t)code);
