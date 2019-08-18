@@ -303,8 +303,10 @@ void kprint(int type, const char *fmt, ...) {
     va_start(args, fmt);
 
     /* print timestamp */
-    kputs("["); kprn_ui(uptime_sec); kputs(".");
-    kprn_ui(uptime_raw); kputs("] ");
+    if (type != KPRN_RAW) {
+        kputs("["); kprn_ui(uptime_sec); kputs(".");
+        kprn_ui(uptime_raw); kputs("] ");
+    }
 
     switch (type) {
         case KPRN_INFO:
@@ -319,6 +321,8 @@ void kprint(int type, const char *fmt, ...) {
         case KPRN_DBG:
             kputs("\e[36mDEBUG\e[37m: ");
             break;
+        case KPRN_RAW:
+            break;
         default:
             return;
     }
@@ -331,7 +335,8 @@ void kprint(int type, const char *fmt, ...) {
         while (*fmt && *fmt != '%') knputs(fmt++, 1);
         if (!*fmt++) {
             va_end(args);
-            kputs("\n");
+            if (type != KPRN_RAW)
+                kputs("\n");
             return;
         }
         switch (*fmt++) {

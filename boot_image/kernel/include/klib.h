@@ -34,6 +34,7 @@ void kprint(int type, const char *fmt, ...);
 #define KPRN_WARN   1
 #define KPRN_ERR    2
 #define KPRN_DBG    3
+#define KPRN_RAW    4
 
 
 

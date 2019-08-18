@@ -4,6 +4,7 @@
 #include <klib.h>
 #include <tty.h>
 #include <system.h>
+#include <keyboard.h>
 
 #define MAX_CODE 0x57
 #define CAPSLOCK 0x3A
@@ -13,6 +14,50 @@
 #define LEFT_SHIFT_REL 0xAA
 #define CTRL 0x1D
 #define CTRL_REL 0x9D
+
+#define KBD_BUF_SIZE 1024
+
+static volatile char   kbd_buffer[KBD_BUF_SIZE];
+static volatile size_t kbd_buffer_i = 0;
+
+char getchar(void) {
+    while (!kbd_buffer_i)
+        asm volatile ("hlt");
+
+    asm volatile ("cli");
+
+    char ret = kbd_buffer[0];
+    for (size_t i = 1; i < kbd_buffer_i; i++) {
+        kbd_buffer[i-1] = kbd_buffer[i];
+    }
+    kbd_buffer_i--;
+
+    asm volatile ("sti");
+
+    return ret;
+}
+
+void gets(char *buf, size_t limit) {
+    for (size_t i = 0; ; ) {
+        char c = getchar();
+        switch (c) {
+            case '\b':
+                if (i) {
+                    i--;
+                    tty_putchar(c);
+                }
+                continue;
+            case '\n':
+                buf[i] = 0;
+                tty_putchar(c);
+                return;
+        }
+        if (i < limit-1) {
+            buf[i++] = c;
+            tty_putchar(c);
+        }
+    }
+}
 
 void keyboard_isr(void);
 void init_kbd(void) {
@@ -128,7 +173,7 @@ void keyboard_handler(uint8_t input_byte) {
         else
             c = ascii_capslock[input_byte];
 
-        tty_putchar(c);
+        kbd_buffer[kbd_buffer_i++] = c;
 
     }
 

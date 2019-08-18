@@ -11,6 +11,7 @@
 #include <keyboard.h>
 #include <pci.h>
 #include <system.h>
+#include <prompt.h>
 #include <lai/core.h>
 #include <lai/helpers/sci.h>
 
@@ -62,5 +63,6 @@ void kernel_init(void) {
     lai_enable_acpi(0);
 
     kprint(0, "kernel init done");
-    for (;;) { asm volatile ("hlt"); }
+
+    debug_prompt();
 }
