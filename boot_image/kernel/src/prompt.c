@@ -24,6 +24,8 @@ static void dump_sdt(void) {
     size_t index = strtoui(index_s);
 
     acpi_sdt_t *sdt = laihost_scan(signature, index);
+    if (!sdt)
+        return;
     kprint(KPRN_RAW, "address of %s is %X\n", signature, sdt);
     kprint(KPRN_RAW, "%s length: %u bytes\n", signature, sdt->length);
     kprint(KPRN_RAW, "dumping to serial port...\n");

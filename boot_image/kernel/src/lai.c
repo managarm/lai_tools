@@ -74,6 +74,10 @@ void laihost_free(void *p) {
 void *laihost_scan(char *signature, size_t index) {
     // The DSDT is a special case, as it must be located using the pointer found in the FADT
     if (!strncmp(signature, "DSDT", 4)) {
+        if (index > 0) {
+            kprint(KPRN_ERR, "acpi: Only valid index for DSDT is 0");
+            return NULL;
+        }
         // Scan for the FADT
         acpi_fadt_t *fadt = (acpi_fadt_t *)acpi_find_sdt("FACP", 0);
         void *dsdt = (char *)(size_t)fadt->dsdt + MEM_PHYS_OFFSET;
