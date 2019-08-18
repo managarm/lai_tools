@@ -8,6 +8,7 @@
 #include <acpi.h>
 #include <e820.h>
 #include <vga_textmode.h>
+#include <keyboard.h>
 #include <pci.h>
 #include <system.h>
 #include <lai/core.h>
@@ -50,6 +51,8 @@ void kernel_init(void) {
     init_acpi();
 
     ENABLE_INTERRUPTS;
+
+    init_kbd();
 
     /* Enable LAI */
     lai_create_namespace();

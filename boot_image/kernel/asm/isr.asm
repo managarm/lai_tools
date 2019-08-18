@@ -61,6 +61,7 @@ global handler_virtualisation_exception
 global handler_security_exception
 ; ... misc
 global irq0_handler
+global keyboard_isr
 global sci_handler_isr
 
 ; CPU exception handlers
@@ -88,6 +89,7 @@ extern except_security_exception
 
 ; misc external references
 extern timer_interrupt
+extern keyboard_handler
 extern sci_handler
 
 section .text
@@ -224,6 +226,17 @@ handler_security_exception:
 irq0_handler:
         pusham
         call timer_interrupt
+        mov al, 0x20    ; acknowledge interrupt to PIC0
+        out 0x20, al
+        popam
+        iretq
+
+keyboard_isr:
+        pusham
+        xor eax, eax
+        in al, 0x60     ; read from keyboard
+        mov edi, eax
+        call keyboard_handler
         mov al, 0x20    ; acknowledge interrupt to PIC0
         out 0x20, al
         popam
