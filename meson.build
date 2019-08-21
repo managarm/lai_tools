@@ -35,6 +35,7 @@ aml_test_cases = [
     'tobuffer',
     'todecimalstring',
     'tohexstring',
+    'tointeger',
     'tostring'
 ]
 
