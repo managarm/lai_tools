@@ -102,6 +102,11 @@ void laihost_handle_amldebug(lai_variable_t *object) {
 int main(int argc, char **argv) {
     lai_state_t state;
 
+    // laiexec is used in tests and might crash in those.
+    // Set output streams to unbuffered so that we can still read error messages.
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+
     argv += 1; // Skip the program name.
     while(*argv) {
         if((*argv)[0] != '-')
