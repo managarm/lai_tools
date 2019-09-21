@@ -6,6 +6,7 @@
 #include <cio.h>
 #include <serial.h>
 #include <lai/host.h>
+#include <lai/helpers/pm.h>
 
 static uint64_t strtoui(const char *s) {
     uint64_t n = 0;
@@ -34,6 +35,17 @@ static void dump_sdt(void) {
     kprint(KPRN_RAW, "done\n");
 }
 
+static void reboot(void) {
+    if(lai_acpi_reset() != LAI_ERROR_NONE){
+        uint8_t good = 0x02;
+        while (good & 0x02)
+            good = port_in_b(0x64);
+        port_out_b(0x64, 0xFE);
+        kprint(KPRN_ERR, "Couldn't reset via ACPI nor via 8042 reset");
+        asm("cli; hlt");
+    }
+}
+
 void debug_prompt(void) {
     kprint(KPRN_RAW, "\nlai_tools debug prompt:\n\n");
 
@@ -44,6 +56,8 @@ void debug_prompt(void) {
         kprint(KPRN_RAW, ">>> ");
         gets(prompt, 128);
         if      (!strcmp(prompt, "dump"))  dump_sdt();
+        if      (!strcmp(prompt, "shutdown")) lai_enter_sleep(5);
+        if      (!strcmp(prompt, "reboot")) reboot();
         else    kprint(KPRN_RAW, "invalid command '%s'\n", prompt);
     }
 }
