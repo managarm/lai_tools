@@ -10,12 +10,11 @@
 
 #define BMREALLOC_STEP 1
 
-static volatile uint32_t *mem_bitmap;
-static volatile uint32_t initial_bitmap[] = { 0xffffff7f };
+static volatile uint32_t *mem_bitmap = (uint32_t *)(MEM_PHYS_OFFSET + MEMORY_BASE);
 static volatile uint32_t *tmp_bitmap;
 
-/* 32 entries because initial_bitmap is a single dword */
-static size_t bitmap_entries = 32;
+// the initial bitmap is 1 page aka PAGE_SIZE * 8 entries
+static size_t bitmap_entries = PAGE_SIZE * 8;
 
 __attribute__((always_inline)) static inline int read_bitmap(size_t i) {
     i -= BITMAP_BASE;
@@ -41,20 +40,9 @@ __attribute__((always_inline)) static inline void unset_bitmap(size_t i, size_t 
 
 /* Populate bitmap using e820 data. */
 void init_pmm(void) {
-    mem_bitmap = initial_bitmap;
-    if (!(tmp_bitmap = pmm_allocz(BMREALLOC_STEP))) {
-        kprint(KPRN_ERR, "pmm_alloc failure in init_pmm(). Halted.");
-        for (;;);
-    }
-
-    tmp_bitmap = (uint32_t *)((size_t)tmp_bitmap + MEM_PHYS_OFFSET);
-
-    for (size_t i = 0; i < (BMREALLOC_STEP * PAGE_SIZE) / sizeof(uint32_t); i++)
-        tmp_bitmap[i] = 0xffffffff;
-
-    mem_bitmap = tmp_bitmap;
-
-    bitmap_entries = ((PAGE_SIZE / sizeof(uint32_t)) * 32) * BMREALLOC_STEP;
+    // clear initial bitmap
+    for (size_t i = 0; i < PAGE_SIZE / sizeof(uint32_t); i++)
+        mem_bitmap[i] = 0xffffffff;
 
     kprint(KPRN_INFO, "pmm: Mapping memory as specified by the e820...");
 
