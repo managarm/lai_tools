@@ -17,8 +17,6 @@ static volatile uint32_t *tmp_bitmap;
 /* 32 entries because initial_bitmap is a single dword */
 static size_t bitmap_entries = 32;
 
-static size_t cur_ptr = BITMAP_BASE;
-
 __attribute__((always_inline)) static inline int read_bitmap(size_t i) {
     i -= BITMAP_BASE;
 
@@ -31,8 +29,6 @@ __attribute__((always_inline)) static inline void set_bitmap(size_t i, size_t co
     size_t f = i + count;
     for (size_t j = i; j < f; j++)
         set_bit(mem_bitmap, j);
-
-    return;
 }
 
 __attribute__((always_inline)) static inline void unset_bitmap(size_t i, size_t count) {
@@ -41,8 +37,6 @@ __attribute__((always_inline)) static inline void unset_bitmap(size_t i, size_t 
     size_t f = i + count;
     for (size_t j = i; j < f; j++)
         reset_bit(mem_bitmap, j);
-
-    return;
 }
 
 /* Populate bitmap using e820 data. */
@@ -109,26 +103,19 @@ void init_pmm(void) {
                 pmm_free(old_bitmap, cur_bitmap_size_in_pages);
             }
 
-            if (e820_map[i].type == 1)
+            if (e820_map[i].type == 1) {
                 unset_bitmap(page, 1);
-            else
-                set_bitmap(page, 1);
+            }
         }
     }
-
-    return;
 }
 
-/* Allocate physical memory. */
 void *pmm_alloc(size_t pg_count) {
     size_t pg_cnt = pg_count;
 
-    for (size_t i = 0; i < bitmap_entries; i++) {
-        if (cur_ptr == BITMAP_BASE + bitmap_entries) {
-            cur_ptr = BITMAP_BASE;
-            cur_ptr = pg_count;
-        }
-        if (!read_bitmap(cur_ptr++)) {
+    size_t i;
+    for (i = BITMAP_BASE; i < BITMAP_BASE + bitmap_entries; ) {
+        if (!read_bitmap(i++)) {
             if (!--pg_cnt)
                 goto found;
         } else {
@@ -139,7 +126,7 @@ void *pmm_alloc(size_t pg_count) {
     return NULL;
 
 found:;
-    size_t start = cur_ptr - pg_count;
+    size_t start = i - pg_count;
     set_bitmap(start, pg_count);
 
     // Return the physical address that represents the start of this physical page(s).
@@ -162,10 +149,7 @@ void *pmm_allocz(size_t pg_count) {
 
 /* Release physical memory. */
 void pmm_free(void *ptr, size_t pg_count) {
-
     size_t start = (size_t)ptr / PAGE_SIZE;
 
     unset_bitmap(start, pg_count);
-
-    return;
 }
