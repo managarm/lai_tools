@@ -50,6 +50,9 @@ void init_pmm(void) {
        fits in that region and if the region type indicates the area itself
        is usable, write that page as free in the bitmap. Otherwise, mark the page as used. */
     for (size_t i = 0; e820_map[i].type; i++) {
+        if (e820_map[i].type != 1)
+            continue;
+
         size_t aligned_base;
         if (e820_map[i].base % PAGE_SIZE)
             aligned_base = e820_map[i].base + (PAGE_SIZE - (e820_map[i].base % PAGE_SIZE));
@@ -91,9 +94,7 @@ void init_pmm(void) {
                 pmm_free(old_bitmap, cur_bitmap_size_in_pages);
             }
 
-            if (e820_map[i].type == 1) {
-                unset_bitmap(page, 1);
-            }
+            unset_bitmap(page, 1);
         }
     }
 }

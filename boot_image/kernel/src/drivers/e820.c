@@ -8,6 +8,7 @@ void get_e820(void *);
 uint64_t memory_size = 0;
 
 e820_entry_t e820_map[256];
+static e820_entry_t e820_map_unsorted[256];
 
 static const char *e820_type(uint32_t type) {
     switch (type) {
@@ -28,7 +29,18 @@ static const char *e820_type(uint32_t type) {
 
 void init_e820(void) {
     /* Get e820 memory map. */
-    get_e820(e820_map);
+    get_e820(e820_map_unsorted);
+
+    /* Sort the entries: free RAM first, anything else after */
+    size_t j = 0;
+    for (size_t i = 0; e820_map_unsorted[i].type; i++) {
+        if (e820_map_unsorted[i].type == 1)
+            e820_map[j++] = e820_map_unsorted[i];
+    }
+    for (size_t i = 0; e820_map_unsorted[i].type; i++) {
+        if (e820_map_unsorted[i].type != 1)
+            e820_map[j++] = e820_map_unsorted[i];
+    }
 
     /* Print out memory map and find total usable memory. */
     for (size_t i = 0; e820_map[i].type; i++) {
