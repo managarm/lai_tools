@@ -32,14 +32,29 @@ void init_e820(void) {
     get_e820(e820_map_unsorted);
 
     /* Sort the entries: free RAM first, anything else after */
+    size_t usable_ram_entry_count = 0;
     size_t j = 0;
     for (size_t i = 0; e820_map_unsorted[i].type; i++) {
-        if (e820_map_unsorted[i].type == 1)
+        if (e820_map_unsorted[i].type == 1) {
+            usable_ram_entry_count++;
             e820_map[j++] = e820_map_unsorted[i];
+        }
     }
     for (size_t i = 0; e820_map_unsorted[i].type; i++) {
         if (e820_map_unsorted[i].type != 1)
             e820_map[j++] = e820_map_unsorted[i];
+    }
+
+    /* Bubble sort usable RAM entries by size of base */
+    for (size_t i = 0; i < usable_ram_entry_count - 1; i++) {
+        size_t t = usable_ram_entry_count - i - 1;
+        for (size_t j = 0; j < t; j++) {
+            if (e820_map[j].base > e820_map[j+1].base) {
+                e820_entry_t e = e820_map[j];
+                e820_map[j] = e820_map[j+1];
+                e820_map[j+1] = e;
+            }
+        }
     }
 
     /* Print out memory map and find total usable memory. */
