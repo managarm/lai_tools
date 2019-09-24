@@ -38,6 +38,7 @@ aml_test_cases = [
     'todecimalstring',
     'tohexstring',
     'tointeger',
+    'findsetbit',
     'tostring'
 ]
 
