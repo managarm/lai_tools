@@ -39,7 +39,8 @@ aml_test_cases = [
     'tohexstring',
     'tointeger',
     'findsetbit',
-    'tostring'
+    'tostring',
+    'objecttype'
 ]
 
 aml_regression_cases = [
