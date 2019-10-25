@@ -40,7 +40,8 @@ aml_test_cases = [
     'tointeger',
     'findsetbit',
     'tostring',
-    'objecttype'
+    'objecttype',
+	'concatenate'
 ]
 
 aml_regression_cases = [
