@@ -155,6 +155,8 @@ class Verifier:
         self.path = path
         self.expected = None
         self.process = None
+        self.c = 0 # Current index into self.expected.
+        self.errors = 0 # Number of errors.
 
         # Extract the expected output from comments in the ASL file.
         expected_script = ''
@@ -181,8 +183,40 @@ class Verifier:
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True)
 
-        (stdout, _) = self.process.communicate()
+        while True:
+            line = self.process.stdout.readline()
+            if not line: # readline() returns "" on EOF.
+                break
 
+            assert line.endswith('\n')
+            line = line[:-1]
+
+            if line.startswith('amldebug: '):
+                # TODO: Parse every trace line as a single Sxpr?
+                self._handle_amldebug(line[len('amldebug: '):])
+            else:
+                print('    ' + line)
+
+        # Wait until the process truely terminates (stdout might be closed before that).
+        self.process.wait()
+
+        return self._verify()
+
+    def _handle_amldebug(self, line):
+        trace = Sxpr.parse(line)
+        assert len(trace) == 1
+
+        e = self.expected[self.c]
+        t = trace[0]
+        print_unclear('  ? {}'.format(t))
+        if not compare_object(e, t):
+            print_bad(" -> Expected {} but trace shows {}".format(e, t))
+            self.errors += 1
+        else:
+            print_good(" -> Verified against {}".format(e))
+        self.c += 1
+
+    def _verify(self):
         message = 'success'
         if self.process.returncode < 0:
             # Some signals have multiple names. Prefer a certain one.
@@ -198,41 +232,17 @@ class Verifier:
         print_colored(bad_color if self.process.returncode else good_color,
                 " -> laiexec returned {}, verifying trace...".format(message))
 
-        trace_script = ''
-        for line in stdout.strip().split('\n'):
-            if line.startswith('amldebug: '):
-                # TODO: Parse every trace line as a single Sxpr?
-                trace_line = line[len('amldebug: '):]
-                print_unclear('  ? ' + trace_line)
-                trace_script += trace_line + '\n'
-            else:
-                print('    ' + line)
+        print_colored(bad_color if self.errors else good_color,
+                " -> Verified {}/{} items, {} errors".format(self.c,
+                        len(self.expected), self.errors))
 
-        trace = Sxpr.parse(trace_script)
-
-        return self._verify(trace)
-
-    def _verify(self, trace):
-        n = 0
-        errors = 0
-        for (e, t) in zip(self.expected, trace):
-            if not compare_object(e, t):
-                print_bad(" -> Expected {} but trace shows {}".format(e, t))
-                errors += 1
-            else:
-                print_good(" -> Verified against {}".format(e))
-            n += 1
-
-        print_colored(bad_color if errors else good_color,
-                " -> Verified {}/{} items, {} errors".format(n, len(self.expected), errors))
-
-        if n < len(self.expected):
+        if self.c < len(self.expected):
             print_bad(" -> Less items in output than expected")
             return False
-        elif n < len(trace):
+        elif self.c > len(self.expected):
             print_bad(" -> More items in output than expected")
             return False
-        elif errors:
+        elif self.errors:
             return False
         elif self.process.returncode:
             return False
