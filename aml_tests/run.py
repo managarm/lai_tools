@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+import collections
+import enum
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -30,6 +33,11 @@ if not sys.stdout.isatty():
     good_color = ''
     bad_color = ''
     reset_code = ''
+
+class Action(enum.Enum):
+    EXPECT = 1
+    PIO_WRITE = 2
+    PIO_READ = 3
 
 class Sxpr:
     @staticmethod
@@ -94,6 +102,8 @@ class Sxpr:
                 arg_strs.append(str(arg))
         return '(' + self.fn + (' ' + ' '.join(arg_strs) if arg_strs else '') + ')'
 
+PioData = collections.namedtuple('PioData', 'bits port value')
+
 def first_arg_equals(e, t):
     """
     Return true if the first args are equal in both
@@ -150,6 +160,15 @@ def compare_object(e, t):
         raise RuntimeError("Unexpected s-expr {}".format(e.fn))
     return e.fn == t.fn and COMPARISON_TABLE[e.fn](e, t)
 
+def parse_bits(s):
+    m = re.fullmatch(r'(\d+)b', s)
+    if not m:
+        raise RuntimeError("Expected number of bits (8b, 16b, ...), got {}".format(s))
+    return m.group(1)
+
+def parse_int(s):
+    return int(s, 0) # base = 0 makes Python handle the 0x prefix automatically.
+
 class Verifier:
     def __init__(self, path):
         self.path = path
@@ -168,9 +187,27 @@ class Verifier:
                 line = line[len('//!'):].lstrip()
 
                 if line.startswith('expect:'):
-                    script = Sxpr.parse(line[len('expect:'):])
-                    assert len(script) == 1
-                    self.expected.append(script[0])
+                    exprs = Sxpr.parse(line[len('expect:'):])
+                    assert len(exprs) == 1
+                    self.expected.append((Action.EXPECT, exprs[0]))
+                elif line.startswith('io-write:'):
+                    tokens = line[len('io-write:'):].strip().split(' ')
+                    assert tokens[0] == 'pio'
+                    assert len(tokens) == 5
+                    assert tokens[3] == '='
+                    bits = parse_bits(tokens[1])
+                    port = parse_int(tokens[2])
+                    value = parse_int(tokens[4])
+                    self.expected.append((Action.PIO_WRITE, PioData(bits, port, value)))
+                elif line.startswith('io-read:'):
+                    tokens = line[len('io-read:'):].strip().split(' ')
+                    assert tokens[0] == 'pio'
+                    assert len(tokens) == 5
+                    assert tokens[3] == '='
+                    bits = parse_bits(tokens[1])
+                    port = parse_int(tokens[2])
+                    value = parse_int(tokens[4])
+                    self.expected.append((Action.PIO_READ, PioData(bits, port, value)))
                 else:
                     raise RuntimeError("Unexpected //! line '{}'".format(line))
 
@@ -184,8 +221,8 @@ class Verifier:
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Run the LAI's interpreter on the AML and parse the trace.
-        self.process = subprocess.Popen(['./' + sys.argv[1], aml_path],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        self.process = subprocess.Popen(['./' + sys.argv[1], '--io', aml_path],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True)
 
         while True:
@@ -196,9 +233,12 @@ class Verifier:
             assert line.endswith('\n')
             line = line[:-1]
 
-            if line.startswith('amldebug: '):
-                # TODO: Parse every trace line as a single Sxpr?
-                self._handle_amldebug(line[len('amldebug: '):])
+            if line.startswith('amldebug:'):
+                self._handle_amldebug(line[len('amldebug:'):])
+            elif line.startswith('io-write: '):
+                self._handle_io_write(line[len('io-write:'):])
+            elif line.startswith('io-read:'):
+                self._handle_io_read(line[len('io-read:'):])
             else:
                 print('    ' + line)
 
@@ -208,17 +248,98 @@ class Verifier:
         return self._verify()
 
     def _handle_amldebug(self, line):
-        trace = Sxpr.parse(line)
-        assert len(trace) == 1
+        exprs = Sxpr.parse(line)
+        assert len(exprs) == 1
+        sx = exprs[0]
+        print_unclear('  ? amldebug: {}'.format(sx))
 
-        e = self.expected[self.c]
-        t = trace[0]
-        print_unclear('  ? {}'.format(t))
-        if not compare_object(e, t):
-            print_bad(" -> Expected {} but trace shows {}".format(e, t))
+        if self.c >= len(self.expected):
+            print_bad(" -> Expected termination")
+            self.c += 1
+            return
+
+        (action, e) = self.expected[self.c]
+        if action != Action.EXPECT:
+            print_bad(" -> Expected {}".format(action))
+            self.errors += 1
+            return
+
+        if not compare_object(e, sx):
+            print_bad(" -> Expected {} but trace shows {}".format(e, sx))
             self.errors += 1
         else:
             print_good(" -> Verified against {}".format(e))
+        self.c += 1
+
+    def _handle_io_write(self, line):
+        tokens = line.strip().split(' ')
+        assert tokens[0] == 'pio'
+        assert len(tokens) == 5
+        assert tokens[3] == '='
+        print_unclear('  ? io-write: pio {} {} = {}'.format(tokens[1], tokens[2], tokens[4]))
+
+        if self.c >= len(self.expected):
+            print_bad(" -> Expected termination")
+            self.c += 1
+            return
+
+        (action, e) = self.expected[self.c]
+        if action != Action.PIO_WRITE:
+            print_bad(" -> Expected {}".format(action))
+            self.errors += 1
+            return
+
+        fail = False
+        if parse_bits(tokens[1]) != e.bits:
+            print_bad(" -> Expected {}b".format(e.bits))
+            fail = True
+        if parse_int(tokens[2]) != e.port:
+            print_bad(" -> Expected port 0x{:x}".format(e.port))
+            fail = True
+        if parse_int(tokens[4]) != e.value:
+            print_bad(" -> Expected value 0x{:x}".format(e.value))
+            fail = True
+
+        if not fail:
+            print_good(" -> Verified")
+        else:
+            self.errors += 1
+        self.c += 1
+
+    def _handle_io_read(self, line):
+        tokens = line.strip().split(' ')
+        assert tokens[0] == 'pio'
+        assert len(tokens) == 5
+        assert tokens[3] == '='
+        assert tokens[4] == '?'
+        print_unclear('  ? io-read: pio {} {} = ?'.format(tokens[1], tokens[2]))
+
+        if self.c >= len(self.expected):
+            print_bad(" -> Expected termination")
+            self.c += 1
+            return
+
+        (action, e) = self.expected[self.c]
+        if action != Action.PIO_READ:
+            print_bad(" -> Expected {}".format(action))
+            self.errors += 1
+            return
+
+        fail = False
+        if parse_bits(tokens[1]) != e.bits:
+            print_bad(" -> Expected {}b".format(e.bits))
+            fail = True
+        if parse_int(tokens[2]) != e.port:
+            print_bad(" -> Expected port 0x{:x}".format(e.port))
+            fail = True
+
+        if not fail:
+            print_good(" -> Verified, returns 0x{:x}".format(e.value))
+            self.process.stdin.write(str(e.value) + '\n')
+        else:
+            self.process.stdin.write(str(0xFFFFFFFF) + '\n')
+            self.errors += 1
+        self.process.stdin.flush()
         self.c += 1
 
     def _verify(self):
