@@ -8,8 +8,141 @@
 #include <lai/core.h>
 
 static const char *path_arg;
+static bool intercept_io = false;
 static bool enable_trace = false;
 static bool load_full_ns = false;
+
+void laihost_outb(uint16_t port, uint8_t val) {
+    if (!intercept_io) {
+        printf("ignoring outb to port 0x%x\n", port);
+        return;
+    }
+
+    printf("io-write: pio 8b 0x%x = 0x%x\n", port, val);
+}
+
+void laihost_outw(uint16_t port, uint16_t val) {
+    if (!intercept_io) {
+        printf("ignoring outw to port 0x%x\n", port);
+        return;
+    }
+
+    printf("io-write: pio 16b 0x%x = 0x%x\n", port, val);
+}
+
+void laihost_outd(uint16_t port, uint32_t val) {
+    if (!intercept_io) {
+        printf("ignoring outd to port 0x%x\n", port);
+        return;
+    }
+
+    printf("io-write: pio 32b 0x%x = 0x%x\n", port, val);
+}
+
+uint8_t laihost_inb(uint16_t port) {
+    if (!intercept_io) {
+        printf("ignoring inb from port 0x%x\n", port);
+        return 0xFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pio 8b 0x%x = ?\n", port);
+    scanf("%u", &val);
+    return val;
+}
+
+uint16_t laihost_inw(uint16_t port) {
+    if (!intercept_io) {
+        printf("ignoring inw from port 0x%x\n", port);
+        return 0xFFFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pio 16b 0x%x = ?\n", port);
+    scanf("%u", &val);
+    return val;
+}
+
+uint32_t laihost_ind(uint16_t port) {
+    if (!intercept_io) {
+        printf("ignoring ind from port 0x%x\n", port);
+        return 0xFFFFFFFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pio 32b 0x%x = ?\n", port);
+    scanf("%u", &val);
+    return val;
+}
+
+void laihost_pci_writeb(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset, uint8_t data) {
+    if (!intercept_io) {
+        printf("ignoring writeb to offset 0x%x\n", offset);
+        return;
+    }
+
+    printf("io-write: pci 8b %04x:%02x:%02x.%x 0x%x = 0x%x\n", seg, bus, slot, fn, offset, data);
+}
+
+void laihost_pci_writew(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset, uint16_t data) {
+    if (!intercept_io) {
+        printf("ignoring writew to offset 0x%x\n", offset);
+        return;
+    }
+
+    printf("io-write: pci 16b %04x:%02x:%02x.%x 0x%x = 0x%x\n", seg, bus, slot, fn, offset, data);
+}
+
+void laihost_pci_writed(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset, uint32_t data) {
+    if (!intercept_io) {
+        printf("ignoring writed to offset 0x%x\n", offset);
+        return;
+    }
+
+    printf("io-write: pci 32b %04x:%02x:%02x.%x 0x%x = 0x%x\n", seg, bus, slot, fn, offset, data);
+}
+
+uint8_t laihost_pci_readb(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset) {
+    if (!intercept_io) {
+        printf("ignoring PCI readb from offset 0x%x\n", offset);
+        return 0xFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pci 8b %04x:%02x:%02x.%x 0x%x = ?\n", seg, bus, slot, fn, offset);
+    scanf("%u", &val);
+    return val;
+}
+
+uint16_t laihost_pci_readw(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset) {
+    if (!intercept_io) {
+        printf("ignoring PCI readw from offset 0x%x\n", offset);
+        return 0xFFFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pci 16b %04x:%02x:%02x.%x 0x%x = ?\n", seg, bus, slot, fn, offset);
+    scanf("%u", &val);
+    return val;
+}
+
+uint32_t laihost_pci_readd(uint16_t seg, uint8_t bus, uint8_t slot, uint8_t fn,
+        uint16_t offset) {
+    if (!intercept_io) {
+        printf("ignoring PCI readd from offset 0x%x\n", offset);
+        return 0xFFFFFFFF;
+    }
+
+    unsigned int val;
+    printf("io-read: pci 32b %04x:%02x:%02x.%x 0x%x = ?\n", seg, bus, slot, fn, offset);
+    scanf("%u", &val);
+    return val;
+}
 
 static void *read_entire_file(const char *path) {
     // Quick and dirty way to read the entire input file.
@@ -113,6 +246,9 @@ int main(int argc, char **argv) {
             break;
         if(!strcmp(*argv, "--trace")) {
             enable_trace = true;
+            argv++;
+        }else if(!strcmp(*argv, "--io")) {
+            intercept_io = true;
             argv++;
         }else if(!strcmp(*argv, "--fullns")) {
             load_full_ns = true;
