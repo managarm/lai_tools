@@ -150,90 +150,99 @@ def compare_object(e, t):
         raise RuntimeError("Unexpected s-expr {}".format(e.fn))
     return e.fn == t.fn and COMPARISON_TABLE[e.fn](e, t)
 
-def verify(expected, trace):
-    n = 0
-    errors = 0
-    for (e, t) in zip(expected, trace):
-        if not compare_object(e, t):
-            print_bad(" -> Expected {} but trace shows {}".format(e, t))
-            errors += 1
-        else:
-            print_good(" -> Verified against {}".format(e))
-        n += 1
+class Verifier:
+    def __init__(self, path):
+        self.path = path
+        self.expected = None
+        self.process = None
 
-    print_colored(bad_color if errors else good_color,
-            " -> Verified {}/{} items, {} errors".format(n, len(expected), errors))
+        # Extract the expected output from comments in the ASL file.
+        expected_script = ''
+        with open(self.path) as f:
+            for line in f:
+                stripped = line.lstrip()
+                if not stripped.startswith('//!'):
+                    continue
+                expected_script += stripped[len('//!'):]
 
-    if n < len(expected):
-        print_bad(" -> Less items in output than expected")
-        return False
-    elif n < len(trace):
-        print_bad(" -> More items in output than expected")
-        return False
-    elif errors:
-        return False
-    return True
+        self.expected = Sxpr.parse(expected_script)
+
+    def run(self):
+        # Compile the ASL to AML.
+        (fd, aml_path) = tempfile.mkstemp(suffix='.aml')
+        os.close(fd)
+
+        # Note that we disable optimizations to that LAI sees the source ASL.
+        subprocess.check_call(['iasl', '-p', aml_path, '-oa', self.path],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Run the LAI's interpreter on the AML and parse the trace.
+        self.process = subprocess.Popen(['./' + sys.argv[1], aml_path],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                universal_newlines=True)
+
+        (stdout, _) = self.process.communicate()
+
+        message = 'success'
+        if self.process.returncode < 0:
+            # Some signals have multiple names. Prefer a certain one.
+            common_signames = {
+                signal.SIGABRT: 'SIGABRT'
+            }
+
+            signo = -self.process.returncode
+            message = common_signames.get(signo, signal.Signals(signo).name)
+        elif self.process.returncode:
+            message = 'failure ({})'.format(self.process.returncode)
+
+        print_colored(bad_color if self.process.returncode else good_color,
+                " -> laiexec returned {}, verifying trace...".format(message))
+
+        trace_script = ''
+        for line in stdout.strip().split('\n'):
+            if line.startswith('amldebug: '):
+                # TODO: Parse every trace line as a single Sxpr?
+                trace_line = line[len('amldebug: '):]
+                print_unclear('  ? ' + trace_line)
+                trace_script += trace_line + '\n'
+            else:
+                print('    ' + line)
+
+        trace = Sxpr.parse(trace_script)
+
+        return self._verify(trace)
+
+    def _verify(self, trace):
+        n = 0
+        errors = 0
+        for (e, t) in zip(self.expected, trace):
+            if not compare_object(e, t):
+                print_bad(" -> Expected {} but trace shows {}".format(e, t))
+                errors += 1
+            else:
+                print_good(" -> Verified against {}".format(e))
+            n += 1
+
+        print_colored(bad_color if errors else good_color,
+                " -> Verified {}/{} items, {} errors".format(n, len(self.expected), errors))
+
+        if n < len(self.expected):
+            print_bad(" -> Less items in output than expected")
+            return False
+        elif n < len(trace):
+            print_bad(" -> More items in output than expected")
+            return False
+        elif errors:
+            return False
+        elif self.process.returncode:
+            return False
+        return True
 
 testcase = os.path.basename(sys.argv[2])
 print("Running AML unit test {}".format(testcase))
 
-# Extract the expected output from comments in the ASL file.
-expected_script = ''
-with open(sys.argv[2]) as f:
-    for line in f:
-        stripped = line.lstrip()
-        if not stripped.startswith('//!'):
-            continue
-        expected_script += stripped[len('//!'):]
-
-expected = Sxpr.parse(expected_script)
-
-# Compile the ASL to AML.
-(fd, path) = tempfile.mkstemp(suffix='.aml')
-os.close(fd)
-
-# Note that we disable optimizations to that LAI sees the source ASL.
-subprocess.check_call(['iasl', '-p', path, '-oa', sys.argv[2]],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-# Run the LAI's interpreter on the AML and parse the trace.
-laiexec = subprocess.Popen(['./' + sys.argv[1], path],
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        universal_newlines=True)
-
-(stdout, _) = laiexec.communicate()
-
-message = 'success'
-if laiexec.returncode < 0:
-	# Some signals have multiple names. Prefer a certain one.
-	common_signames = {
-		signal.SIGABRT: 'SIGABRT'
-	}
-
-	signo = -laiexec.returncode
-	message = common_signames.get(signo, signal.Signals(signo).name)
-elif laiexec.returncode:
-	message = 'failure ({})'.format(laiexec.returncode)
-
-print_colored(bad_color if laiexec.returncode else good_color,
-        " -> laiexec returned {}, verifying trace...".format(message))
-
-trace_script = ''
-for line in stdout.strip().split('\n'):
-    if line.startswith('amldebug: '):
-        # TODO: Parse every trace line as a single Sxpr?
-        trace_line = line[len('amldebug: '):]
-        print_unclear('  ? ' + trace_line)
-        trace_script += trace_line + '\n'
-    else:
-        print('    ' + line)
-
-trace = Sxpr.parse(trace_script)
+ver = Verifier(sys.argv[2])
 
 # Verify the output, return non-zero on error.
-if not verify(expected, trace):
+if not ver.run():
     sys.exit(1)
-
-if laiexec.returncode:
-    sys.exit(1)
-
