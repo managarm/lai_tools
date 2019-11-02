@@ -1,11 +1,11 @@
 
-//! (string "Hello!")
-//! (string "Hello")
-//! (string "")
-//! (string "Test")
-//! (string "Tes")
-//! (string "")
-//! (string "World")
+//! expect: (string "Hello!")
+//! expect: (string "Hello")
+//! expect: (string "")
+//! expect: (string "Test")
+//! expect: (string "Tes")
+//! expect: (string "")
+//! expect: (string "World")
 
 DefinitionBlock("out.aml", "DSDT", 2, "LAI", "LAI_TEST", 1)
 {

@@ -1,10 +1,10 @@
 
-//! (integer 0xC1790001)
-//! (integer 0x00)
-//! (integer 0xFFFFFFFF)
-//! (string "12340002")
-//! (string "qwrtyu0003")
-//! (buffer 0xB0 0xB1 0xB2 0xB3 0xB4)
+//! expect: (integer 0xC1790001)
+//! expect: (integer 0x00)
+//! expect: (integer 0xFFFFFFFF)
+//! expect: (string "12340002")
+//! expect: (string "qwrtyu0003")
+//! expect: (buffer 0xB0 0xB1 0xB2 0xB3 0xB4)
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {

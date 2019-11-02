@@ -18,7 +18,7 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 
         Method(_INI)
         {
-            //! (integer 2)
+            //! expect: (integer 2)
             Debug = FOO (1)
         }
     }

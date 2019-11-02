@@ -1,7 +1,7 @@
 
 // absd tests
-//! (integer 333)
-//! (integer 333)
+//! expect: (integer 333)
+//! expect: (integer 333)
 
 // sqrt tests, not working :(
 // (integer 12)
@@ -9,11 +9,11 @@
 // (integer 3)
 
 // triangle number
-//! (integer 1)
-//! (integer 6)
-//! (integer 1540)
-//! (integer 1176)
-//! (integer 5050)
+//! expect: (integer 1)
+//! expect: (integer 6)
+//! expect: (integer 1540)
+//! expect: (integer 1176)
+//! expect: (integer 5050)
 
 // gcd
 // (integer 4)

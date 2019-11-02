@@ -1,7 +1,7 @@
-//! (string "56,78,91,67")
-//! (string "54,21,45")
-//! (string "98,67,21,28")
-//! (string "26,84,01,37")
+//! expect: (string "56,78,91,67")
+//! expect: (string "54,21,45")
+//! expect: (string "98,67,21,28")
+//! expect: (string "26,84,01,37")
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {

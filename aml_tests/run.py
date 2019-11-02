@@ -153,7 +153,7 @@ def compare_object(e, t):
 class Verifier:
     def __init__(self, path):
         self.path = path
-        self.expected = None
+        self.expected = []
         self.process = None
         self.c = 0 # Current index into self.expected.
         self.errors = 0 # Number of errors.
@@ -162,12 +162,17 @@ class Verifier:
         expected_script = ''
         with open(self.path) as f:
             for line in f:
-                stripped = line.lstrip()
-                if not stripped.startswith('//!'):
+                line = line.lstrip()
+                if not line.startswith('//!'):
                     continue
-                expected_script += stripped[len('//!'):]
+                line = line[len('//!'):].lstrip()
 
-        self.expected = Sxpr.parse(expected_script)
+                if line.startswith('expect:'):
+                    script = Sxpr.parse(line[len('expect:'):])
+                    assert len(script) == 1
+                    self.expected.append(script[0])
+                else:
+                    raise RuntimeError("Unexpected //! line '{}'".format(line))
 
     def run(self):
         # Compile the ASL to AML.

@@ -1,8 +1,8 @@
-//! (integer 0x56789E8D)
-//! (integer 0x12345678abcdef)
-//! (integer 0x5CAB54FF43219216)
-//! (integer 5313464)
-//! (integer 0x532521abdef)
+//! expect: (integer 0x56789E8D)
+//! expect: (integer 0x12345678abcdef)
+//! expect: (integer 0x5CAB54FF43219216)
+//! expect: (integer 5313464)
+//! expect: (integer 0x532521abdef)
 
 DefinitionBlock("out.aml", "DSDT", 2, "LAI", "LAI_TEST", 1)
 {

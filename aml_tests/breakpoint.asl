@@ -1,4 +1,4 @@
-//! (string "Made it past BreakPoint!")
+//! expect: (string "Made it past BreakPoint!")
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {

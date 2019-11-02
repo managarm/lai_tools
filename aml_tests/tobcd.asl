@@ -1,7 +1,7 @@
 
-//! (integer 361617507105)
-//! (integer 40925960310)
-//! (integer 78187414305)
+//! expect: (integer 361617507105)
+//! expect: (integer 40925960310)
+//! expect: (integer 78187414305)
 
 DefinitionBlock("out.aml", "DSDT", 2, "LAI", "LAI_TEST", 1)
 {

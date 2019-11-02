@@ -1,8 +1,8 @@
 
-//! (integer 3)
-//! (integer 0)
-//! (integer 4)
-//! (integer 3)
+//! expect: (integer 3)
+//! expect: (integer 0)
+//! expect: (integer 4)
+//! expect: (integer 3)
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {

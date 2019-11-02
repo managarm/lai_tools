@@ -1,10 +1,10 @@
 
-//! (integer 0x0)
-//! (integer 0x10)
-//! (integer 0x1c)
-//! (integer 0x0)
-//! (integer 0x07)
-//! (integer 0x18)
+//! expect: (integer 0x0)
+//! expect: (integer 0x10)
+//! expect: (integer 0x1c)
+//! expect: (integer 0x0)
+//! expect: (integer 0x07)
+//! expect: (integer 0x18)
 
 DefinitionBlock("out.aml", "DSDT", 2, "LAI", "LAI_TEST", 1)
 {

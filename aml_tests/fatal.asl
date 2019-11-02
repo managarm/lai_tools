@@ -1,6 +1,6 @@
 
-//! (string "Before Fatal!")
-//! (string "After Fatal!")
+//! expect: (string "Before Fatal!")
+//! expect: (string "After Fatal!")
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {

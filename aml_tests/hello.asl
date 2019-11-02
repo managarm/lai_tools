@@ -1,5 +1,5 @@
 
-//! (string "Hello world!")
+//! expect: (string "Hello world!")
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {
