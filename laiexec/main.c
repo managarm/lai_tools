@@ -26,7 +26,7 @@ static void *read_entire_file(const char *path) {
     return buffer;
 }
 
-void *laihost_scan(char *name, size_t index) {
+void *laihost_scan(const char *name, size_t index) {
     char *path;
     void *buffer = NULL;
 
