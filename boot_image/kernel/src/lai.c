@@ -71,7 +71,7 @@ void laihost_free(void *p) {
     return kfree(p);
 }
 
-void *laihost_scan(char *signature, size_t index) {
+void *laihost_scan(const char *signature, size_t index) {
     // The DSDT is a special case, as it must be located using the pointer found in the FADT
     if (!strncmp(signature, "DSDT", 4)) {
         if (index > 0) {
@@ -119,6 +119,7 @@ void laihost_sleep(uint64_t duration) {
 void *laihost_map(size_t phys_addr, size_t count) {
     // all physical memory is mapped into the higher half, so we can just return
     // the physical address + the offset into the higher half.
+    (void)count;
     size_t virt_addr = phys_addr + MEM_PHYS_OFFSET;
     return (void *)virt_addr;
 }

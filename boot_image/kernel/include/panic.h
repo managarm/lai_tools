@@ -3,7 +3,7 @@
 
 
 
-void panic(const char *msg, int code);
+__attribute__((noreturn)) void panic(const char *msg, int code);
 
 
 
