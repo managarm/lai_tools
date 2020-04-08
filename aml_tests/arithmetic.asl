@@ -3,10 +3,10 @@
 //! expect: (integer 333)
 //! expect: (integer 333)
 
-// sqrt tests, not working :(
-// (integer 12)
-// (integer 5)
-// (integer 3)
+// sqrt tests
+//! expect: (integer 12)
+//! expect: (integer 5)
+//! expect: (integer 3)
 
 // triangle number
 //! expect: (integer 1)
@@ -16,9 +16,9 @@
 //! expect: (integer 5050)
 
 // gcd
-// (integer 4)
-// (integer 14)
-// (integer 3)
+//! expect: (integer 4)
+//! expect: (integer 14)
+//! expect: (integer 3)
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {
@@ -39,25 +39,22 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
         }
 
         // Calculate square root
-        Method(SQRT, 1, Serialized)
-        {
-            Name(NMBR, 0)
-            Name(N, 1)
-            Name(N1, 0)
-            NMBR = Arg0
-            N1 = (((N + NMBR) / N) >> 1)
-            
-            While(ABSD(N1, N) > 1)
+        Method(SQRT, 1)
+        {   
+            If (Arg0 == 0 || Arg0 == 1) 
             {
-                N = N1
-                N1 = (((N + NMBR) / N) >> 1)
+                Return (Arg0)
             }
 
-            While(N1 * N1 > NMBR)
+            Local0 = 1
+            Local1 = 1
+            While (Local1 <= Arg0)
             {
-                N1--;
+                Local0++
+                Local1 = Local0 * Local0
             }
-            Return (N1)
+
+            Return (Local0 - 1)
         }
 
         // Calculate Triangle Number
@@ -95,9 +92,9 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             Debug = ABSD(123, 456)
             Debug = ABSD(456, 123)
 
-            //Debug = SQRT(144)
-            //Debug = SQRT(25)
-            //Debug = SQRT(9)
+            Debug = SQRT(144)
+            Debug = SQRT(25)
+            Debug = SQRT(9)
 
             Debug = TRIG(1)
             Debug = TRIG(3)
@@ -105,9 +102,9 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             Debug = TRIG(48)
             Debug = TRIG(100)
 
-            //Debug = GCD(12, 32)
-            //Debug = GCD(154,84)
-            //Debug = GCD(123, 321)
+            Debug = GCD(12, 32)
+            Debug = GCD(154,84)
+            Debug = GCD(123, 321)
         }
     }
 }
