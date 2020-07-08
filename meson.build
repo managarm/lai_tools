@@ -25,6 +25,7 @@ aml_test_cases = [
     'implicit_conversion',
     'index',
     'hello',
+    'match',
     'mutex',
     'package',
     'power_res',
