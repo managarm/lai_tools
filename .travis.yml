@@ -1,7 +1,6 @@
-
 language: c
 os: linux
-dist: xenial
+dist: bionic
 addons:
     apt:
         packages:
@@ -26,4 +25,3 @@ after_success:
    # Deploy to coveralls.io
   - cd ..
   - coveralls -r . -b build/ --gcov-options '\-lp' --exclude meson-private
-
