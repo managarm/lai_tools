@@ -28,6 +28,7 @@ aml_test_cases = [
     'match',
     'mutex',
     'package',
+    'varpackage',
     'power_res',
     'processor',
     'references',
