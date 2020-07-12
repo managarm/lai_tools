@@ -33,6 +33,7 @@ aml_test_cases = [
     'power_res',
     'processor',
     'references',
+    'revision',
     'scopes',
     'field',
     'indexfield',
