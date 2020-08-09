@@ -24,7 +24,7 @@ char getchar(void) {
     while (!kbd_buffer_i)
         asm volatile ("hlt");
 
-    asm volatile ("cli");
+    DISABLE_INTERRUPTS;
 
     char ret = kbd_buffer[0];
     for (size_t i = 1; i < kbd_buffer_i; i++) {
@@ -32,7 +32,7 @@ char getchar(void) {
     }
     kbd_buffer_i--;
 
-    asm volatile ("sti");
+    ENABLE_INTERRUPTS;
 
     return ret;
 }

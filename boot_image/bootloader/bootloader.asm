@@ -10,7 +10,7 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 mov ss, ax
-mov sp, 0x7bf0
+mov sp, 0x7c00
 sti
 
 ; load rest of bootloader
@@ -86,6 +86,12 @@ jc err
 
 mov si, DoneMsg
 call simple_print
+
+pusha
+mov ax, 0x1112
+xor bx, bx
+int 0x10
+popa
 
 ; enter pmode
 

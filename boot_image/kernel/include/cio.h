@@ -3,10 +3,8 @@
 
 #include <stdint.h>
 
-#define BB                      asm volatile ("xchg bx, bx")
-
-#define DISABLE_INTERRUPTS      asm volatile ("cli")
-#define ENABLE_INTERRUPTS       asm volatile ("sti")
+#define DISABLE_INTERRUPTS      asm volatile ("cli":::"memory")
+#define ENABLE_INTERRUPTS       asm volatile ("sti":::"memory")
 
 #define SYSTEM_HALT              \
     asm volatile (              \
@@ -14,27 +12,28 @@
                     "cli;"      \
                     "hlt;"      \
                     "jmp 1b;"   \
+                    ::: "memory"\
                  )
 
 #define port_out_b(port, value) ({				\
 	asm volatile (	"out dx, al"				\
 					:							\
 					: "a" (value), "d" (port)	\
-					: );						\
+					: "memory" );						\
 })
 
 #define port_out_w(port, value) ({				\
 	asm volatile (	"out dx, ax"				\
 					:							\
 					: "a" (value), "d" (port)	\
-					: );						\
+					: "memory"  );						\
 })
 
 #define port_out_d(port, value) ({				\
 	asm volatile (	"out dx, eax"				\
 					:							\
 					: "a" (value), "d" (port)	\
-					: );						\
+					: "memory"  );						\
 })
 
 #define port_in_b(port) ({						\
@@ -42,7 +41,7 @@
 	asm volatile (	"in al, dx"					\
 					: "=a" (value)				\
 					: "d" (port)				\
-					: );						\
+					: "memory"  );						\
 	value;										\
 })
 
@@ -51,7 +50,7 @@
 	asm volatile (	"in ax, dx"					\
 					: "=a" (value)				\
 					: "d" (port)				\
-					: );						\
+					: "memory"  );						\
 	value;										\
 })
 
@@ -60,7 +59,7 @@
 	asm volatile (	"in eax, dx"				\
 					: "=a" (value)				\
 					: "d" (port)				\
-					: );						\
+					: "memory"  );						\
 	value;										\
 })
 

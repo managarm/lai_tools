@@ -7,7 +7,7 @@
 
 #define VIDEO_BOTTOM ((VD_ROWS * VD_COLS) - 1)
 #define VD_COLS (80 * 2)
-#define VD_ROWS 25
+#define VD_ROWS 50
 
 static void escape_parse(char c);
 

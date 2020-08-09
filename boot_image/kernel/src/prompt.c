@@ -56,8 +56,8 @@ void debug_prompt(void) {
         kprint(KPRN_RAW, ">>> ");
         gets(prompt, 128);
         if      (!strcmp(prompt, "dump"))  dump_sdt();
-        if      (!strcmp(prompt, "shutdown")) lai_enter_sleep(5);
-        if      (!strcmp(prompt, "reboot")) reboot();
-        else    kprint(KPRN_RAW, "invalid command '%s'\n", prompt);
+        else if (!strcmp(prompt, "shutdown")) lai_enter_sleep(5);
+        else if (!strcmp(prompt, "reboot")) reboot();
+        else if (*prompt) kprint(KPRN_RAW, "invalid command '%s'\n", prompt);
     }
 }

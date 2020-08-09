@@ -12,11 +12,6 @@ global load_tss
 
 section .bss
 
-align 16
-kstack:
-    resb 0x10000
-.top:
-
 align 4096
 
 kernel_pagemap equ kernel_pagemap_t
@@ -124,56 +119,9 @@ db 10010010b		; Access
 db 10001111b		; Granularity
 db 0x00				; Base (high 8 bits)
 
-; tss
-.tss:
-    dw 104              ; tss length
-  .tss_low:
-    dw 0
-  .tss_mid:
-    db 0
-  .tss_flags1:
-    db 10001001b
-  .tss_flags2:
-    db 00000000b
-  .tss_high:
-    db 0
-  .tss_upper32:
-    dd 0
-  .tss_reserved:
-    dd 0
-
 .GDTEnd:
 
 section .text
-
-bits 64
-
-load_tss:
-    ; addr in RDI
-    push rbx
-    mov eax, edi
-    mov rbx, GDT.tss_low
-    mov word [rbx], ax
-    mov eax, edi
-    and eax, 0xff0000
-    shr eax, 16
-    mov rbx, GDT.tss_mid
-    mov byte [rbx], al
-    mov eax, edi
-    and eax, 0xff000000
-    shr eax, 24
-    mov rbx, GDT.tss_high
-    mov byte [rbx], al
-    mov rax, rdi
-    shr rax, 32
-    mov rbx, GDT.tss_upper32
-    mov dword [rbx], eax
-    mov rbx, GDT.tss_flags1
-    mov byte [rbx], 10001001b
-    mov rbx, GDT.tss_flags2
-    mov byte [rbx], 0
-    pop rbx
-    ret
 
 bits 32
 
@@ -218,8 +166,6 @@ clearscreen:
     ret
 
 startup:
-    mov esp, kstack.top - kernel_phys_offset
-
     ; check if long mode is present
     mov eax, 0x80000001
     xor edx, edx
@@ -364,7 +310,7 @@ startup:
     mov rax, .higher_half
     jmp rax
   .higher_half:
-    mov rsp, kstack.top
+    mov rsp, 0xffff800000effff0
 
     mov rbx, GDT
     lgdt [rbx]
