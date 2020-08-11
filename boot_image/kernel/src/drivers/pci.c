@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <cio.h>
 
-/* Shamelessly stoled from qookie */
+/* Shamelessly stolen from qookie */
 
 uint8_t pci_read_byte(uint32_t bus, uint32_t slot, uint32_t func, uint16_t offset) {
     port_out_d(0xCF8, (bus << 16) | (slot << 11) | (func << 8) | (offset & 0xFFFF) | 0x80000000);

@@ -87,11 +87,15 @@ jc err
 mov si, DoneMsg
 call simple_print
 
+; 80x50 text mode
 pusha
 mov ax, 0x1112
 xor bx, bx
 int 0x10
 popa
+
+call get_e820
+call flush_irqs
 
 ; enter pmode
 
@@ -126,7 +130,7 @@ halt:
 hlt
 jmp halt
 
-ErrMsg db 0x0d, 0x0a, 'Error, system halted.', 0
+ErrMsg db 0x0d, 0x0a, 'Err system halted', 0
 
 %include 'includes/disk.inc'
 %include 'includes/simple_print.inc'
@@ -170,6 +174,47 @@ times 510-($-$$) db 0x00
 dw 0xaa55
 
 ; start of LBA sector 1
+
+; grab e820 and put it at 0x500
+
+get_e820:
+    pushad
+    mov edi, 0x500
+  .loop:
+    mov eax, 0xe820
+    mov ecx, 24
+    mov edx, 0x534d4150
+    push edi
+    int 0x15
+    pop edi
+    jc .done
+    add edi, 24
+    test ebx, ebx
+    jz .done
+    jmp .loop
+  .done:
+    xor al, al
+    mov cx, 24
+    rep stosb
+    popad
+    ret
+
+flush_irqs:
+    pusha
+    cli
+    mov al, 0xff
+    out 0x21, al
+    out 0xa1, al
+    sti
+
+    xor al, al
+    mov cx, 0x1000
+  .loop:
+    out 0x80, al
+    loop .loop
+
+    popa
+    ret
 
 %include 'includes/a20_enabler.inc'
 %include 'includes/gdt.inc'
