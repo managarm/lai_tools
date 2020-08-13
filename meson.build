@@ -64,6 +64,9 @@ endforeach
 test('aml-aml_tests/' + 'fatal.asl', run_py,
         args: [laiexec, files('aml_tests/' + 'fatal.asl')], should_fail: true)
 
+test('aml-aml_tests/' + 'external.asl', laiexec,
+        args: [files('aml_tests/' + 'external.aml')])
+
 foreach f : aml_regression_cases
     test('aml-aml_regressions/' + f + '.asl', run_py,
         args: [laiexec, files('aml_regressions/' + f + '.asl')])

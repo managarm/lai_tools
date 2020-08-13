@@ -4,3 +4,5 @@ build
 *.bin
 *.elf
 boot_image/boot.hdd
+
+!aml_tests/external.aml
