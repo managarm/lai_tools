@@ -179,6 +179,7 @@ dw 0xaa55
 
 get_e820:
     pushad
+    xor ebx, ebx
     mov edi, 0x500
   .loop:
     mov eax, 0xe820
