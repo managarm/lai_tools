@@ -80,7 +80,7 @@ void init_acpi(void) {
             i = 0xe0000 + MEM_PHYS_OFFSET - 16;
             continue;
         }
-        if (!kstrncmp((char *)i, "RSD PTR ", 8)) {
+        if (!strncmp((char *)i, "RSD PTR ", 8)) {
             kprint(KPRN_INFO, "ACPI: Found RSDP at %X", i);
             rsdp = (rsdp_t *)i;
             goto rsdp_found;
@@ -113,7 +113,7 @@ rsdp_found:
     pic_enable_irq(sci_irq);
 
     lai_set_acpi_revision(rsdp->rev);
-    
+
     return;
 }
 

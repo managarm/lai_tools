@@ -19,30 +19,41 @@ char *strcpy(char *dest, const char *src) {
     return dest;
 }
 
-char *strncpy(char *dest, const char *src, size_t cnt) {
+char *strncpy(char *dest, const char *src, size_t count) {
     size_t i = 0;
 
-    for (i = 0; i < cnt; i++)
+    for (i = 0; i < count; i++) {
+        if (src[i] == 0) {
+            while (i < count)
+                dest[i++] = 0;
+            break;
+        }
         dest[i] = src[i];
+    }
 
     return dest;
 }
 
-int strcmp(const char *dst, const char *src) {
+int strcmp(const char *s1, const char *s2) {
     size_t i;
 
-    for (i = 0; dst[i] == src[i]; i++) {
-        if ((!dst[i]) && (!src[i])) return 0;
+    for (i = 0; s1[i] == s2[i]; i++) {
+        if (!s1[i])
+            return 0;
     }
 
-    return 1;
+    return (int)s1[i] - (int)s2[i];
 }
 
-int strncmp(const char *dst, const char *src, size_t count) {
+int strncmp(const char *s1, const char *s2, size_t count) {
     size_t i;
 
-    for (i = 0; i < count; i++)
-        if (dst[i] != src[i]) return 1;
+    for (i = 0; i < count; i++) {
+        if (s1[i] != s2[i])
+            return s1[i] - s2[i];
+        if (!s1[i])
+            return 0;
+    }
 
     return 0;
 }
@@ -55,106 +66,58 @@ size_t strlen(const char *str) {
     return len;
 }
 
-void *memcpy(void *dest, const void *src, size_t count) {
-    size_t i = 0;
-
-    uint8_t *dest2 = dest;
-    const uint8_t *src2 = src;
+void *memcpy(void *s1, const void *s2, size_t count) {
+    size_t i;
+    char *p1 = s1;
+    const char *p2 = s2;
 
     for (i = 0; i < count; i++) {
-        dest2[i] = src2[i];
+        p1[i] = p2[i];
     }
 
-    return dest;
+    return s1;
 }
 
 void *memset(void *s, int c, size_t count) {
-    uint8_t *p = s, *end = p + count;
-    for (; p != end; p++) {
-        *p = (uint8_t)c;
-    }
+    size_t i;
+    char *p = s;
+
+    for (i = 0; i < count; i++)
+        p[i] = (char)c;
 
     return s;
 }
 
 void *memmove(void *dest, const void *src, size_t count) {
-    size_t i = 0;
-
-    uint8_t *dest2 = dest;
-    const uint8_t *src2 = src;
+    size_t i;
+    char *pdest = dest;
+    const char *psrc = src;
 
     if (src > dest) {
         for (i = 0; i < count; i++) {
-            dest2[i] = src2[i];
+            pdest[i] = psrc[i];
         }
     } else if (src < dest) {
         for (i = count; i > 0; i--) {
-            dest2[i - 1] = src2[i - 1];
+            pdest[i - 1] = psrc[i - 1];
         }
     }
 
     return dest;
 }
 
-int memcmp(const void *s1, const void *s2, size_t n) {
-    const uint8_t *a = s1;
-    const uint8_t *b = s2;
+int memcmp(const void *s1, const void *s2, size_t count) {
+    size_t i;
+    const char *p1 = s1;
+    const char *p2 = s2;
 
-    for (size_t i = 0; i < n; i++) {
-        if (a[i] < b[i]) {
-            return -1;
-        } else if (a[i] > b[i]) {
-            return 1;
+    for (i = 0; i < count; i++) {
+        if (p1[i] != p2[i]) {
+            return (int)p1[i] - (int)p2[i];
         }
     }
 
     return 0;
-}
-
-size_t kmemcpy(char *dest, const char *source, size_t count) {
-    size_t i;
-
-    for (i = 0; i < count; i++)
-        dest[i] = source[i];
-
-    return i;
-}
-
-size_t kstrcpy(char *dest, const char *source) {
-    size_t i;
-
-    for (i = 0; source[i]; i++)
-        dest[i] = source[i];
-
-    dest[i] = 0;
-
-    return i;
-}
-
-int kstrcmp(const char *dest, const char *source) {
-    size_t i;
-
-    for (i = 0; dest[i] == source[i]; i++)
-        if ((!dest[i]) && (!source[i])) return 0;
-
-    return 1;
-}
-
-int kstrncmp(const char *dest, const char *source, size_t len) {
-    size_t i;
-
-    for (i = 0; i < len; i++)
-        if (dest[i] != source[i]) return 1;
-
-    return 0;
-}
-
-size_t kstrlen(const char *str) {
-    size_t len;
-
-    for (len = 0; str[len]; len++);
-
-    return len;
 }
 
 typedef struct {
