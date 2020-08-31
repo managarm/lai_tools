@@ -17,16 +17,16 @@
 
 #define KBD_BUF_SIZE 1024
 
-static volatile char   kbd_buffer[KBD_BUF_SIZE];
+static volatile int    kbd_buffer[KBD_BUF_SIZE];
 static volatile size_t kbd_buffer_i = 0;
 
-char getchar(void) {
+int getchar(void) {
     while (!kbd_buffer_i)
         asm volatile ("hlt");
 
     DISABLE_INTERRUPTS;
 
-    char ret = kbd_buffer[0];
+    int ret = kbd_buffer[0];
     for (size_t i = 1; i < kbd_buffer_i; i++) {
         kbd_buffer[i-1] = kbd_buffer[i];
     }
@@ -112,18 +112,22 @@ void keyboard_handler(uint8_t input_byte) {
         extra_scancodes = 0;
         switch (input_byte) {
             case 0x48:
-                /* cursor up */
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_UP;
                 break;
             case 0x4B:
-                /* cursor left */
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_LEFT;
                 break;
             case 0x50:
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_DOWN;
                 break;
             case 0x4D:
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_RIGHT;
                 break;
             case 0x49:
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_PGUP;
                 break;
             case 0x51:
+                kbd_buffer[kbd_buffer_i++] = GETCHAR_PGDOWN;
                 break;
             case 0x53:
                 break;

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <kernel.h>
 
 char *strcpy(char *, const char *);
@@ -29,6 +30,11 @@ void knputs(const char *, size_t);
 void kprn_ui(uint64_t);
 void kprn_x(uint64_t);
 void kprint(int type, const char *fmt, ...);
+
+extern char *dmesg;
+extern size_t dmesg_i;
+extern size_t dmesg_len;
+extern bool dmesg_on;
 
 #define KPRN_INFO   0
 #define KPRN_WARN   1

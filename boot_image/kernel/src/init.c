@@ -30,6 +30,8 @@ void kernel_init(void) {
 
     init_pmm();
 
+    dmesg_on = true;
+
     kprint(KPRN_INFO, "PIC: Remapping legacy PIC...");
     map_PIC(0x20, 0x28);
     /* Mask all IRQs */

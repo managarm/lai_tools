@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <kernel.h>
 #include <klib.h>
 #include <mm.h>
@@ -188,20 +189,23 @@ void *krealloc(void *ptr, size_t new) {
 }
 
 void kputs(const char *string) {
-
-    for (size_t i = 0; string[i]; i++) {
-      #ifdef _KERNEL_QEMU_OUTPUT_
-        port_out_b(0xe9, string[i]);
-      #endif
-      #ifdef _KERNEL_VGA_OUTPUT_
-        tty_putchar(string[i]);
-      #endif
-    }
-
-    return;
+    knputs(string, strlen(string));
 }
 
+char *dmesg = NULL;
+size_t dmesg_i = 0;
+size_t dmesg_limit = 0;
+bool dmesg_on = false;
+
 void knputs(const char *string, size_t len) {
+    if (dmesg_on) {
+        if (dmesg_i + len > dmesg_limit) {
+            dmesg_limit += 1024;
+            dmesg = krealloc(dmesg, dmesg_limit);
+        }
+        memcpy(dmesg + dmesg_i, string, len);
+        dmesg_i += len;
+    }
 
     for (size_t i = 0; i < len; i++) {
       #ifdef _KERNEL_QEMU_OUTPUT_
