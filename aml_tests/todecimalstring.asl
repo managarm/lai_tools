@@ -2,6 +2,7 @@
 //! expect: (string "54,21,45")
 //! expect: (string "98,67,21,28")
 //! expect: (string "26,84,01,37")
+//! expect: (string "2882400001")
 
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
 {
@@ -21,6 +22,11 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             Name(STR2, "26,84,01,37")
             ToDecimalString(STR2, STR1)
             Debug = STR1
+
+            Name(STR3, "")
+            Name(INT0, 0xABCDEF01)
+            ToDecimalString(INT0, STR3)
+            Debug = STR3
         }
     }
 }
