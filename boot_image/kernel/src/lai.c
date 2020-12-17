@@ -63,11 +63,13 @@ void *laihost_malloc(size_t size) {
     return kalloc(size);
 }
 
-void *laihost_realloc(void *p, size_t size) {
+void *laihost_realloc(void *p, size_t size, size_t oldsize) {
+    (void)oldsize;
     return krealloc(p, size);
 }
 
-void laihost_free(void *p) {
+void laihost_free(void *p, size_t oldsize) {
+    (void)oldsize;
     return kfree(p);
 }
 
