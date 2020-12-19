@@ -6,7 +6,6 @@
 #include <system.h>
 #include <panic.h>
 #include <acpi.h>
-#include <e820.h>
 #include <vga_textmode.h>
 #include <keyboard.h>
 #include <pci.h>
@@ -15,8 +14,10 @@
 #include <lai/core.h>
 #include <lai/helpers/sci.h>
 
-void kernel_init(void) {
-    /* interrupts disabled */
+#include <stivale.h>
+
+void _start(struct stivale_struct *stivale_struct) {
+    init_gdt();
 
     #ifdef _KERNEL_VGA_OUTPUT_
         init_vga_textmode();
@@ -25,10 +26,8 @@ void kernel_init(void) {
     /* build descriptor tables */
     load_IDT();
 
-    /* detect memory */
-    init_e820();
-
-    init_pmm();
+    init_pmm((void *)stivale_struct->memory_map_addr,
+             (size_t)stivale_struct->memory_map_entries);
 
     dmesg_on = true;
 
@@ -48,7 +47,7 @@ void kernel_init(void) {
     lai_enable_tracing(1);
 
     /* initialise ACPI */
-    init_acpi();
+    init_acpi(stivale_struct->rsdp);
 
     ENABLE_INTERRUPTS;
 

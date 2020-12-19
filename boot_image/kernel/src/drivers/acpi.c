@@ -69,26 +69,11 @@ void sci_handler(void) {
     kprint(KPRN_INFO, "acpi: a SCI event has occured: %x (%s)", ev, ev_name);
 }
 
-void init_acpi(void) {
+void init_acpi(uintptr_t _rsdp) {
     kprint(KPRN_INFO, "ACPI: Initialising...");
 
-    /* look for the "RSD PTR " signature from 0x80000 to 0xa0000 */
-                                           /* 0xf0000 to 0x100000 */
-    for (size_t i = 0x80000 + MEM_PHYS_OFFSET; i < 0x100000 + MEM_PHYS_OFFSET; i += 16) {
-        if (i == 0xa0000 + MEM_PHYS_OFFSET) {
-            /* skip video mem and mapped hardware */
-            i = 0xe0000 + MEM_PHYS_OFFSET - 16;
-            continue;
-        }
-        if (!strncmp((char *)i, "RSD PTR ", 8)) {
-            kprint(KPRN_INFO, "ACPI: Found RSDP at %X", i);
-            rsdp = (rsdp_t *)i;
-            goto rsdp_found;
-        }
-    }
-    panic("ACPI: RSDP table not found", 0);
+    rsdp = (void *)_rsdp;
 
-rsdp_found:
     if (rsdp->rev >= 2 && rsdp->xsdt_addr) {
         use_xsdt = 1;
         kprint(KPRN_INFO, "acpi: Found XSDT at %X", (uint32_t)rsdp->xsdt_addr + MEM_PHYS_OFFSET);

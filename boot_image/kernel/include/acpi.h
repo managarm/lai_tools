@@ -50,7 +50,7 @@ extern rsdp_t *rsdp;
 extern rsdt_t *rsdt;
 extern xsdt_t *xsdt;
 
-void init_acpi(void);
+void init_acpi(uintptr_t _rsdp);
 void *acpi_find_sdt(const char *, int);
 int acpi_get_sci_irq(void);
 void acpi_init_ec(void);

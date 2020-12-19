@@ -3,6 +3,7 @@ build
 *.o
 *.bin
 *.elf
+boot_image/limine
 boot_image/boot.hdd
 
 !aml_tests/external.aml

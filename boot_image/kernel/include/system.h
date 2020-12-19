@@ -16,6 +16,7 @@ void pic_enable_irq(int irq);
 void set_pit_freq(uint32_t frequency);
 void sleep(uint64_t time);
 
+void init_gdt(void);
 void load_IDT(void);
 
 extern volatile uint64_t uptime_raw;

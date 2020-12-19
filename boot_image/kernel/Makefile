@@ -20,7 +20,8 @@ CHARDFLAGS := \
     -ffreestanding \
     -fno-stack-protector \
     -I./include/ \
-    -I./src/lai/include/
+    -I./src/lai/include/ \
+    -I../limine/stivale/
 
 ifeq ($(DEBUG), qemu)
 CHARDFLAGS := $(CHARDFLAGS) -D_KERNEL_QEMU_OUTPUT_
@@ -34,9 +35,8 @@ CLINKFLAGS := \
 
 CFLAGS = -Wall -Wextra -O2
 
-kernel.bin: $(OBJ) $(H_FILES)
+kernel.elf: $(OBJ) $(H_FILES)
 	$(CC) $(OBJ) $(CLINKFLAGS) -T ./linker.ld -o $@
-	$(CC) $(OBJ) $(CLINKFLAGS) -T ./linker-elf.ld -o kernel.elf
 
 %.o: %.c
 	$(CC) $(CHARDFLAGS) $(CFLAGS) -c $< -o $@
@@ -45,4 +45,4 @@ kernel.bin: $(OBJ) $(H_FILES)
 	nasm $< -f elf64 -o $@
 
 clean:
-	rm -f $(OBJ) kernel.bin kernel.elf
+	rm -f $(OBJ) kernel.elf

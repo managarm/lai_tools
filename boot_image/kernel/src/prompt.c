@@ -96,12 +96,12 @@ static void dump_dmesg(void) {
                 break;
             case GETCHAR_LEFT:
             case GETCHAR_PGUP:
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < 25; i++)
                     dmesg_prevline(&cur_line);
                 break;
             case GETCHAR_RIGHT:
             case GETCHAR_PGDOWN:
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < 25; i++)
                     dmesg_nextline(&cur_line);
                 break;
             case 'q':

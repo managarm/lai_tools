@@ -2,8 +2,9 @@
 #include <stddef.h>
 #include <mm.h>
 #include <klib.h>
-#include <e820.h>
 #include <bit.h>
+
+#include <stivale.h>
 
 #define MEMORY_BASE 0x1000000
 #define BITMAP_BASE (MEMORY_BASE / PAGE_SIZE)
@@ -38,28 +39,28 @@ __attribute__((always_inline)) static inline void unset_bitmap(size_t i, size_t 
         reset_bit(mem_bitmap, j);
 }
 
-/* Populate bitmap using e820 data. */
-void init_pmm(void) {
+/* Populate bitmap using memmap data. */
+void init_pmm(struct stivale_mmap_entry *memmap, size_t memmap_entries) {
     // clear initial bitmap
     for (size_t i = 0; i < PAGE_SIZE / sizeof(uint32_t); i++)
         mem_bitmap[i] = 0xffffffff;
 
-    kprint(KPRN_INFO, "pmm: Mapping memory as specified by the e820...");
+    kprint(KPRN_INFO, "pmm: Mapping memory as specified by the memmap...");
 
-    /* For each region specified by the e820, iterate over each page which
+    /* For each region specified by the memmap, iterate over each page which
        fits in that region and if the region type indicates the area itself
        is usable, write that page as free in the bitmap. Otherwise, mark the page as used. */
-    for (size_t i = 0; e820_map[i].type; i++) {
-        if (e820_map[i].type != 1)
+    for (size_t i = 0; i < memmap_entries; i++) {
+        if (memmap[i].type != 1)
             continue;
 
         size_t aligned_base;
-        if (e820_map[i].base % PAGE_SIZE)
-            aligned_base = e820_map[i].base + (PAGE_SIZE - (e820_map[i].base % PAGE_SIZE));
+        if (memmap[i].base % PAGE_SIZE)
+            aligned_base = memmap[i].base + (PAGE_SIZE - (memmap[i].base % PAGE_SIZE));
         else
-            aligned_base = e820_map[i].base;
-        size_t aligned_length = (e820_map[i].length / PAGE_SIZE) * PAGE_SIZE;
-        if ((e820_map[i].base % PAGE_SIZE) && aligned_length) aligned_length -= PAGE_SIZE;
+            aligned_base = memmap[i].base;
+        size_t aligned_length = (memmap[i].length / PAGE_SIZE) * PAGE_SIZE;
+        if ((memmap[i].base % PAGE_SIZE) && aligned_length) aligned_length -= PAGE_SIZE;
 
         for (size_t j = 0; j * PAGE_SIZE < aligned_length; j++) {
             size_t addr = aligned_base + j * PAGE_SIZE;

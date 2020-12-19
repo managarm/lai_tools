@@ -1,16 +1,27 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 MAKE=gmake
 command -v gmake || MAKE=make
 
 if [ "$1" = "clean" ]; then
     $MAKE clean -C kernel
-    $MAKE clean -C bootloader
     exit 0
 fi
 
+[ -d limine ] || git clone https://github.com/limine-bootloader/limine.git --depth=1 --branch=v0.7.2
+$MAKE -C limine limine-install
+
 $MAKE DEBUG=vga -C kernel
-$MAKE -C bootloader
-mv bootloader/bootloader.bin ./boot.hdd
+
+rm -f boot.hdd
+dd if=/dev/zero bs=1M count=0 seek=64 of=boot.hdd
+parted -s boot.hdd mklabel gpt
+parted -s boot.hdd mkpart primary 2048s 100%
+
+echfs-utils -g -p0 boot.hdd quick-format 512
+echfs-utils -g -p0 boot.hdd import limine.cfg limine.cfg
+echfs-utils -g -p0 boot.hdd import kernel/kernel.elf kernel.elf
+
+./limine/limine-install ./limine/limine.bin ./boot.hdd
