@@ -10,8 +10,8 @@ if [ "$1" = "clean" ]; then
     exit 0
 fi
 
-[ -d limine ] || git clone https://github.com/limine-bootloader/limine.git --depth=1 --branch=v0.7.2
-$MAKE -C limine limine-install
+[ -d limine ] || git clone https://github.com/limine-bootloader/limine.git --depth=1 --branch=v1.0-branch
+$MAKE -C limine
 
 $MAKE DEBUG=vga -C kernel
 

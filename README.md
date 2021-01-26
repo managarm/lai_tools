@@ -31,6 +31,3 @@ $ ./build.sh
 A bootable file called `boot.hdd` should be created in the `boot_image` directory.
 Test it in QEMU or any other virtualisation solution, or write it onto a drive
 (e.g.: a USB stick) by means of `cat` or `dd`.
-
-The `boot_image/kernel/kernel.bin` file is a valid multiboot kernel that can be booted
-using a multiboot compliant bootloader such as GNU GRUB.

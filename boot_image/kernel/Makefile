@@ -20,8 +20,7 @@ CHARDFLAGS := \
     -ffreestanding \
     -fno-stack-protector \
     -I./include/ \
-    -I./src/lai/include/ \
-    -I../limine/stivale/
+    -I./src/lai/include/
 
 ifeq ($(DEBUG), qemu)
 CHARDFLAGS := $(CHARDFLAGS) -D_KERNEL_QEMU_OUTPUT_
