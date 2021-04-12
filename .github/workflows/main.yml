@@ -1,0 +1,27 @@
+name: lai-test
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install meson build-essential mtools dosfstools acpica-tools parted
+
+    - name: Build and test lai
+      run: mkdir build && cd build && meson .. && ninja && meson test -v
+
+    - name: Build test image
+      run: cd boot_image && make clean all
+
+    - name: Upload test image
+      uses: actions/upload-artifact@v1
+      with:
+        name: lai_test_image.hdd
+        path: boot_image/test.hdd
