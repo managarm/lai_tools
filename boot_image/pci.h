@@ -1,6 +1,8 @@
 #ifndef __PCI_H__
 #define __PCI_H__
 
+#include <stdint.h>
+
 uint8_t pci_read_byte(uint32_t bus, uint32_t slot, uint32_t func, uint16_t offset);
 
 void pci_write_byte(uint32_t bus, uint32_t slot, uint32_t func, uint16_t offset, uint8_t value);

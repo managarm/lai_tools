@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <pci.h>
 #include <cio.h>
 
 /* Shamelessly stolen from qookie */

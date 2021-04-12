@@ -1,12 +1,11 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <acpi.h>
-#include <kernel.h>
-#include <klib.h>
-#include <panic.h>
-#include <acpi.h>
-#include <mm.h>
-#include <system.h>
+#include <lib.h>
+#include <print.h>
+#include <pmm.h>
+#include <idt.h>
+#include <pic.h>
 #include <acpispec/tables.h>
 #include <lai/helpers/sci.h>
 #include <lai/drivers/ec.h>
@@ -27,7 +26,7 @@ void *acpi_find_sdt(const char *signature, int index) {
             ptr = (acpi_sdt_t *)((size_t)xsdt->sdt_ptr[i] + MEM_PHYS_OFFSET);
             if (!strncmp(ptr->signature, signature, 4)) {
                 if (cnt++ == index) {
-                    kprint(KPRN_INFO, "acpi: Found \"%s\" at %X", signature, (size_t)ptr);
+                    print("acpi: Found \"%s\" at %X\n", signature, (size_t)ptr);
                     return (void *)ptr;
                 }
             }
@@ -37,14 +36,14 @@ void *acpi_find_sdt(const char *signature, int index) {
             ptr = (acpi_sdt_t *)((size_t)rsdt->sdt_ptr[i] + MEM_PHYS_OFFSET);
             if (!strncmp(ptr->signature, signature, 4)) {
                 if (cnt++ == index) {
-                    kprint(KPRN_INFO, "acpi: Found \"%s\" at %X", signature, (size_t)ptr);
+                    print("acpi: Found \"%s\" at %X\n", signature, (size_t)ptr);
                     return (void *)ptr;
                 }
             }
         }
     }
 
-    kprint(KPRN_INFO, "acpi: \"%s\" not found", signature);
+    print("acpi: \"%s\" not found\n", signature);
     return (void *)0;
 }
 
@@ -57,8 +56,10 @@ int acpi_get_sci_irq(void) {
     }
 }
 
-void sci_handler_isr(void);
-void sci_handler(void) {
+__attribute__((interrupt))
+static void sci_handler(void *p) {
+    (void)p;
+
     uint16_t ev = lai_get_sci_event();
 
     const char *ev_name = "?";
@@ -66,20 +67,20 @@ void sci_handler(void) {
     if (ev & ACPI_SLEEP_BUTTON) ev_name = "sleep button";
     if (ev & ACPI_WAKE) ev_name = "sleep wake up";
 
-    kprint(KPRN_INFO, "acpi: a SCI event has occured: %x (%s)", ev, ev_name);
+    print("acpi: a SCI event has occured: %x (%s)\n", ev, ev_name);
 }
 
 void init_acpi(uintptr_t _rsdp) {
-    kprint(KPRN_INFO, "ACPI: Initialising...");
+    print("acpi: Initialising...\n");
 
     rsdp = (void *)_rsdp;
 
     if (rsdp->rev >= 2 && rsdp->xsdt_addr) {
         use_xsdt = 1;
-        kprint(KPRN_INFO, "acpi: Found XSDT at %X", (uint32_t)rsdp->xsdt_addr + MEM_PHYS_OFFSET);
+        print("acpi: Found XSDT at %X\n", (uint32_t)rsdp->xsdt_addr + MEM_PHYS_OFFSET);
         xsdt = (xsdt_t *)(size_t)(rsdp->xsdt_addr + MEM_PHYS_OFFSET);
     } else {
-        kprint(KPRN_INFO, "acpi: Found RSDT at %X", (uint32_t)rsdp->rsdt_addr + MEM_PHYS_OFFSET);
+        print("acpi: Found RSDT at %X\n", (uint32_t)rsdp->rsdt_addr + MEM_PHYS_OFFSET);
         rsdt = (rsdt_t *)(size_t)(rsdp->rsdt_addr + MEM_PHYS_OFFSET);
     }
 
@@ -88,13 +89,14 @@ void init_acpi(uintptr_t _rsdp) {
     if ((madt = acpi_find_sdt("APIC", 0))) {
         if(!(madt->flags & (1 << 0))){
             // PCAT_COMPAT isn't set so there aren't any PICs
-            panic("No PIC detected", 0);
+            print("No PIC detected");
+            for (;;) asm ("hlt");
         }
     }
 
     int sci_irq = acpi_get_sci_irq();
-    kprint(KPRN_DBG, "acpi: SCI IRQ = %x", sci_irq);
-    idt_register_handler(sci_irq + 0x20, 0b10001110, 0, sci_handler_isr);
+    print("acpi: SCI IRQ = %x\n", sci_irq);
+    idt_register_handler(sci_irq + 0x20, sci_handler, 0, 0b10001110);
     pic_enable_irq(sci_irq);
 
     lai_set_acpi_revision(rsdp->rev);
@@ -116,7 +118,7 @@ void acpi_init_ec(void){
             continue;
 
         // Found one
-        struct lai_ec_driver *driver = kalloc(sizeof(struct lai_ec_driver)); // Dynamically allocate the memory since -
+        struct lai_ec_driver *driver = pmm_alloc(DIV_ROUNDUP(sizeof(struct lai_ec_driver), PAGE_SIZE)); // Dynamically allocate the memory since -
         lai_init_ec(node, driver);                                           // we dont know how many ECs there could be
 
         struct lai_ns_child_iterator child_it = LAI_NS_CHILD_ITERATOR_INITIALIZER(node);

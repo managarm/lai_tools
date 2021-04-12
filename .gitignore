@@ -4,6 +4,7 @@ build
 *.bin
 *.elf
 boot_image/limine
-boot_image/boot.hdd
+boot_image/pack
+boot_image/*.hdd
 
 !aml_tests/external.aml
