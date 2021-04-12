@@ -65,14 +65,13 @@ void laihost_panic(const char *str) {
 }
 
 void *laihost_malloc(size_t size) {
-    return pmm_alloc(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
+    return pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
 }
 
-void *laihost_realloc(void *p, size_t size, size_t oldsize) {
-    void *old = p - MEM_PHYS_OFFSET;
-    void *new = pmm_alloc(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
+void *laihost_realloc(void *old, size_t size, size_t oldsize) {
+    void *new = pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
     memcpy(new, old, size > oldsize ? oldsize : size);
-    laihost_free(p, oldsize);
+    pmm_free(old - MEM_PHYS_OFFSET, DIV_ROUNDUP(oldsize, PAGE_SIZE));
     return new;
 }
 
@@ -123,7 +122,7 @@ void laihost_outd(uint16_t port, uint32_t value) {
 
 void laihost_sleep(uint64_t duration) {
     (void)duration;
-    panic("laihost_sleep is a stub");
+    print("laihost_sleep is a stub\n");
 }
 
 void *laihost_map(size_t phys_addr, size_t count) {

@@ -9,7 +9,7 @@
 #include <lai/core.h>
 #include <lai/helpers/sci.h>
 
-static uint8_t stack[4096];
+static uint8_t stack[16384];
 
 struct stivale2_header_tag_terminal terminal_hdr_tag = {
     .tag = {
@@ -82,7 +82,7 @@ void _start(struct stivale2_struct *stivale2_struct) {
         for (;;) asm ("hlt");
     }
 
-    lai_enable_tracing(1);
+    lai_enable_tracing(LAI_TRACE_OP | LAI_TRACE_IO);
 
     init_acpi(rsdp_str_tag->rsdp);
 

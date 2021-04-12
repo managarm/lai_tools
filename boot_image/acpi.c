@@ -56,6 +56,8 @@ int acpi_get_sci_irq(void) {
     }
 }
 
+static int sci_irq;
+
 __attribute__((interrupt))
 static void sci_handler(void *p) {
     (void)p;
@@ -68,6 +70,8 @@ static void sci_handler(void *p) {
     if (ev & ACPI_WAKE) ev_name = "sleep wake up";
 
     print("acpi: a SCI event has occured: %x (%s)\n", ev, ev_name);
+
+    pic_eoi(sci_irq);
 }
 
 void init_acpi(uintptr_t _rsdp) {
@@ -94,7 +98,7 @@ void init_acpi(uintptr_t _rsdp) {
         }
     }
 
-    int sci_irq = acpi_get_sci_irq();
+    sci_irq = acpi_get_sci_irq();
     print("acpi: SCI IRQ = %x\n", sci_irq);
     idt_register_handler(sci_irq + 0x20, sci_handler, 0, 0b10001110);
     pic_enable_irq(sci_irq);

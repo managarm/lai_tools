@@ -8,7 +8,6 @@
 
 #define PAGE_SIZE ((size_t)4096)
 
-#define KERNEL_PHYS_OFFSET ((size_t)0xffffffff80000000)
 #define MEM_PHYS_OFFSET ((size_t)0xffff800000000000)
 
 void *pmm_alloc(size_t);

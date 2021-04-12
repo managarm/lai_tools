@@ -59,3 +59,11 @@ uint8_t get_PIC0_mask(void) {
 uint8_t get_PIC1_mask(void) {
     return port_in_b(0xA1);
 }
+
+void pic_eoi(uint8_t current_vector) {
+    if (current_vector >= 8) {
+        port_out_b(0xa0, 0x20);
+    }
+
+    port_out_b(0x20, 0x20);
+}

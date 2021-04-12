@@ -4,6 +4,8 @@
 #include <print.h>
 #include <lib.h>
 
+#include <cio.h>
+
 static const char *base_digits = "0123456789abcdef";
 
 static void prn_str(char *print_buf, size_t limit, size_t *print_buf_i, const char *string) {
@@ -110,6 +112,9 @@ void print(const char *fmt, ...) {
     // We allocate on the stack to be thread saf *and* avoid using the allocator
     char buf[MAX_PRINT_BUF_SIZE];
     size_t len = vsnprint(buf, MAX_PRINT_BUF_SIZE, fmt, args);
+
+    for (size_t i = 0; i < len; i++)
+        port_out_b(0xe9, buf[i]);
 
     if (terminal_print != NULL)
         terminal_print(buf, len);

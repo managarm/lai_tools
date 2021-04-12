@@ -53,4 +53,4 @@ clean:
 
 .PHONY: run
 run:
-	qemu-system-x86_64 -net none -enable-kvm -cpu host -hda test.hdd
+	qemu-system-x86_64 -m 2G -net none -enable-kvm -cpu host -hda test.hdd -debugcon stdio

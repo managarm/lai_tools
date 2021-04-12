@@ -23,7 +23,7 @@ void idt_register_handler(size_t vec, void *handler, uint8_t ist, uint8_t type) 
     uint64_t p = (uint64_t)handler;
 
     idt[vec].offset_lo = (uint16_t)p;
-    idt[vec].selector = 0x08;
+    idt[vec].selector = 0x28;
     idt[vec].ist = ist;
     idt[vec].type_attr = type;
     idt[vec].offset_mid = (uint16_t)(p >> 16);
