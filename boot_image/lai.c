@@ -65,18 +65,26 @@ void laihost_panic(const char *str) {
 }
 
 void *laihost_malloc(size_t size) {
+    if (size == 0)
+        return (void *)0x8000000000000000;
     return pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
 }
 
 void *laihost_realloc(void *old, size_t size, size_t oldsize) {
-    void *new = pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
+    if (size == 0) {
+        laihost_free(old, oldsize);
+        return (void *)0x8000000000000000;
+    }
+    void *new = laihost_malloc(size);
     memcpy(new, old, size > oldsize ? oldsize : size);
-    pmm_free(old - MEM_PHYS_OFFSET, DIV_ROUNDUP(oldsize, PAGE_SIZE));
+    laihost_free(old, oldsize);
     return new;
 }
 
 void laihost_free(void *p, size_t oldsize) {
-    return pmm_free(p - MEM_PHYS_OFFSET, DIV_ROUNDUP(oldsize, PAGE_SIZE));
+    if (oldsize == 0)
+        return;
+    pmm_free(p - MEM_PHYS_OFFSET, DIV_ROUNDUP(oldsize, PAGE_SIZE));
 }
 
 void *laihost_scan(const char *signature, size_t index) {
