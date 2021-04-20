@@ -29,13 +29,17 @@ KERNEL_HDD = test.hdd
 .PHONY: all
 all: $(KERNEL_HDD)
 
-$(KERNEL_HDD): kernel.elf limine
+$(KERNEL_HDD): kernel.elf dir2fat32-esp limine
 	mkdir -p pack
 	cp kernel.elf limine.cfg limine/limine.sys pack/
 	mkdir -p pack/EFI/BOOT
 	cp limine/BOOTX64.EFI pack/EFI/BOOT/
-	./dir2fat32.sh -f $(KERNEL_HDD) 64 pack
+	./dir2fat32-esp -f $(KERNEL_HDD) 64 pack
 	limine/limine-install $(KERNEL_HDD)
+
+dir2fat32-esp:
+	wget https://github.com/mintsuki-org/dir2fat32-esp/raw/master/dir2fat32-esp
+	chmod +x dir2fat32-esp
 
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-branch-binary --depth=1
