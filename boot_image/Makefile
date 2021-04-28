@@ -7,7 +7,8 @@ CFLAGS = -Wall -Wextra -O2 -pipe
 LDINTERNALFLAGS := \
 	-Tlinker.ld    \
 	-nostdlib      \
-	-pie -static-pie -fno-pic -fpie \
+	-static-pie    \
+	-fno-pic -fpie \
 	-z max-page-size=0x1000
 
 INTERNALCFLAGS  :=       \
@@ -57,4 +58,4 @@ clean:
 
 .PHONY: run
 run:
-	qemu-system-x86_64 -m 2G -net none -enable-kvm -cpu host -hda test.hdd -debugcon stdio
+	qemu-system-x86_64 -M q35 -net none -enable-kvm -cpu host -hda test.hdd -debugcon stdio

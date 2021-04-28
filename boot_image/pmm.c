@@ -71,7 +71,7 @@ void pmm_init(struct stivale2_mmap_entry *memmap, size_t memmap_entries) {
             highest_addr = top;
     }
 
-    size_t bitmap_size = (highest_addr / PAGE_SIZE) / 8;
+    size_t bitmap_size = ALIGN_UP((highest_addr / PAGE_SIZE) / 8, PAGE_SIZE);
 
     // Second, find a location with enough free pages to host the bitmap.
     for (size_t i = 0; i < memmap_entries; i++) {
