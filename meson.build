@@ -20,6 +20,7 @@ aml_test_cases = [
     'tobcd',
     'breakpoint',
     'calls',
+    'comparison',
     'computational_data',
     'event',
     'implicit_semantics',
