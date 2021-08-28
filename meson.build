@@ -28,6 +28,7 @@ aml_test_cases = [
     'index',
     'hello',
     'match',
+    'mid',
     'mutex',
     'package',
     'varpackage',
