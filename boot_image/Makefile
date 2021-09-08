@@ -27,7 +27,7 @@ INTERNALCFLAGS  :=       \
 	-mno-sse2            \
 	-mno-red-zone
 
-CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine)
+CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine | grep -v lai_tools)
 OBJ    := $(CFILES:.c=.o)
 
 .PHONY: all
