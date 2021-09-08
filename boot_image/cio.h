@@ -16,49 +16,49 @@
                  )
 
 #define port_out_b(port, value) ({				\
-	asm volatile (	"out dx, al"				\
+	asm volatile (	"outb %0, %1"				\
 					:							\
-					: "a" (value), "d" (port)	\
+					: "a" ((uint8_t)value), "Nd" (port)	\
 					: "memory" );						\
 })
 
 #define port_out_w(port, value) ({				\
-	asm volatile (	"out dx, ax"				\
+	asm volatile (	"outw %0, %1"				\
 					:							\
-					: "a" (value), "d" (port)	\
+					: "a" ((uint16_t)value), "Nd" (port)	\
 					: "memory"  );						\
 })
 
 #define port_out_d(port, value) ({				\
-	asm volatile (	"out dx, eax"				\
+	asm volatile (	"outl %0, %1"				\
 					:							\
-					: "a" (value), "d" (port)	\
+					: "a" ((uint32_t)value), "Nd" (port)	\
 					: "memory"  );						\
 })
 
 #define port_in_b(port) ({						\
 	uint8_t value;								\
-	asm volatile (	"in al, dx"					\
+	asm volatile (	"inb %1, %0"					\
 					: "=a" (value)				\
-					: "d" (port)				\
+					: "Nd" (port)				\
 					: "memory"  );						\
 	value;										\
 })
 
 #define port_in_w(port) ({						\
 	uint16_t value;								\
-	asm volatile (	"in ax, dx"					\
+	asm volatile (	"inw %1, %0"					\
 					: "=a" (value)				\
-					: "d" (port)				\
+					: "Nd" (port)				\
 					: "memory"  );						\
 	value;										\
 })
 
 #define port_in_d(port) ({						\
 	uint32_t value;								\
-	asm volatile (	"in eax, dx"				\
+	asm volatile (	"inl %1, %0"				\
 					: "=a" (value)				\
-					: "d" (port)				\
+					: "Nd" (port)				\
 					: "memory"  );						\
 	value;										\
 })

@@ -6,7 +6,7 @@
 #define bit_test(var, offset) ({                      \
     bool __ret;                                       \
     asm volatile (                                    \
-        "bt %1, %2;"                                  \
+        "bt %2, %1;"                                  \
         : "=@ccc" (__ret)                             \
         : "r" ((uint32_t)var), "r" ((uint32_t)offset) \
     );                                                \
@@ -16,7 +16,7 @@
 static inline bool bitmap_test(void *bitmap, size_t bit) {
     bool ret;
     asm volatile (
-        "bt %1, %2"
+        "bt %2, %1"
         : "=@ccc" (ret)
         : "m" (FLAT_PTR(bitmap)), "r" (bit)
         : "memory"
@@ -27,7 +27,7 @@ static inline bool bitmap_test(void *bitmap, size_t bit) {
 static inline bool bitmap_set(void *bitmap, size_t bit) {
     bool ret;
     asm volatile (
-        "bts %1, %2"
+        "bts %2, %1"
         : "=@ccc" (ret), "+m" (FLAT_PTR(bitmap))
         : "r" (bit)
         : "memory"
@@ -38,7 +38,7 @@ static inline bool bitmap_set(void *bitmap, size_t bit) {
 static inline bool bitmap_unset(void *bitmap, size_t bit) {
     bool ret;
     asm volatile (
-        "btr %1, %2"
+        "btr %2, %1"
         : "=@ccc" (ret), "+m" (FLAT_PTR(bitmap))
         : "r" (bit)
         : "memory"
