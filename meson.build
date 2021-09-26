@@ -37,6 +37,7 @@ aml_test_cases = [
     'references',
     'revision',
     'scopes',
+    'timer',
     'field',
     'indexfield',
     'bankfield',
