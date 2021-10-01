@@ -2,6 +2,8 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -230,6 +232,16 @@ void laihost_handle_amldebug(lai_variable_t *object) {
     printf("amldebug: ");
     print_lai_object(object);
     printf("\n");
+}
+
+void laihost_sleep(uint64_t ms) {
+    usleep(ms * 1000);
+}
+
+uint64_t laihost_timer() {
+    struct timespec current = {0};
+    clock_gettime(CLOCK_MONOTONIC, &current);
+    return (current.tv_nsec + current.tv_sec * 1000000000) / 100;
 }
 
 int main(int argc, char **argv) {
