@@ -234,10 +234,6 @@ void laihost_handle_amldebug(lai_variable_t *object) {
     printf("\n");
 }
 
-void laihost_sleep(uint64_t ms) {
-    usleep(ms * 1000);
-}
-
 uint64_t laihost_timer() {
     struct timespec current = {0};
     clock_gettime(CLOCK_MONOTONIC, &current);
