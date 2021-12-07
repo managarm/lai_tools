@@ -8,9 +8,6 @@ INTERNALLDFLAGS :=          \
 	-Tlinker.ld             \
 	-nostdlib               \
 	-z max-page-size=0x1000 \
-	-static                 \
-	-pie                    \
-	--no-dynamic-linker     \
 	-ztext
 
 INTERNALCFLAGS  :=       \
@@ -19,16 +16,19 @@ INTERNALCFLAGS  :=       \
 	-std=gnu11           \
 	-ffreestanding       \
 	-fno-stack-protector \
-	-fpie                \
+	-fno-pic             \
 	-mno-80387           \
 	-mno-mmx             \
 	-mno-3dnow           \
 	-mno-sse             \
 	-mno-sse2            \
-	-mno-red-zone
+	-mno-red-zone        \
+	-mcmodel=kernel      \
+	-MMD
 
-CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine | grep -v lai_tools)
-OBJ    := $(CFILES:.c=.o)
+CFILES      := $(shell find -L ./ -type f -name '*.c' | grep -v limine | grep -v lai_tools)
+OBJ         := $(CFILES:.c=.o)
+HEADER_DEPS := $(CFILES:.c=.d)
 
 .PHONY: all
 all: test.iso
@@ -50,12 +50,18 @@ limine:
 kernel.elf: $(OBJ)
 	$(LD) $(OBJ) $(LDFLAGS) $(INTERNALLDFLAGS) -o $@
 
+-include $(HEADER_DEPS)
+
 %.o: %.c
 	$(CC) $(CFLAGS) $(INTERNALCFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
-	rm -rf kernel.elf test.iso $(OBJ)
+	rm -rf kernel.elf test.iso $(OBJ) $(HEADER_DEPS)
+
+.PHONY: distclean
+distclean: clean
+	rm -rf limine
 
 .PHONY: run
 run:

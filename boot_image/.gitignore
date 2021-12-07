@@ -1,1 +1,6 @@
-test.iso
+*.d
+*.o
+*.elf
+*.iso
+limine
+pack
