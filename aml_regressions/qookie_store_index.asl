@@ -1,10 +1,20 @@
 DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1) {
     Scope(_SB) {
-        Device(LNKA) { }
-        Device(LNKB) { }
-        Device(LNKC) { }
-        Device(LNKD) { }
-        Device(LNKS) { }
+        Device(LNKA) {
+            Name(_ADR, 0)
+        }
+        Device(LNKB) {
+            Name(_ADR, 0)
+        }
+        Device(LNKC) {
+            Name(_ADR, 0)
+        }
+        Device(LNKD) {
+            Name(_ADR, 0)
+        }
+        Device(LNKS) {
+            Name(_ADR, 0)
+        }
 
         Method (_PRT, 0, NotSerialized)
         {
