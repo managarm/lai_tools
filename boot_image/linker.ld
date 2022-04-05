@@ -18,7 +18,7 @@ PHDRS
 SECTIONS
 {
     /* We wanna be placed in the topmost 2GiB of the address space, for optimisations */
-    /* and because that is what the stivale2 spec mandates. */
+    /* and because that is what the Limine spec mandates. */
     /* Any address in this region will do, but often 0xffffffff80000000 is chosen as */
     /* that is the beginning of the region. */
     . = 0xffffffff80000000;
@@ -29,12 +29,6 @@ SECTIONS
 
     /* Move to the next memory page for .rodata */
     . += CONSTANT(MAXPAGESIZE);
-
-    /* We place the .stivale2hdr section containing the header in its own section, */
-    /* and we use the KEEP directive on it to make sure it doesn't get discarded. */
-    .stivale2hdr : {
-        KEEP(*(.stivale2hdr))
-    } :rodata
 
     .rodata : {
         *(.rodata*)

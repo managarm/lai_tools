@@ -3,8 +3,8 @@
 #include <stdarg.h>
 #include <print.h>
 #include <lib.h>
-
 #include <cio.h>
+#include <limine.h>
 
 static const char *base_digits = "0123456789abcdef";
 
@@ -101,7 +101,10 @@ static void prn_x(char *print_buf, size_t limit, size_t *print_buf_i, uint64_t x
     prn_str(print_buf, limit, print_buf_i, buf + i);
 }
 
-void (*terminal_print)(const char *buf, size_t len) = NULL;
+static volatile struct limine_terminal_request terminal_request = {
+    .id = LIMINE_TERMINAL_REQUEST,
+    .revision = 0
+};
 
 #define MAX_PRINT_BUF_SIZE 256
 
@@ -116,8 +119,11 @@ void print(const char *fmt, ...) {
     for (size_t i = 0; i < len; i++)
         port_out_b(0xe9, buf[i]);
 
-    if (terminal_print != NULL)
-        terminal_print(buf, len);
+    if (terminal_request.response != NULL
+     && terminal_request.response->terminal_count > 0) {
+        struct limine_terminal *terminal = terminal_request.response->terminals[0];
+        terminal_request.response->write(terminal, buf, len);
+    }
 
     va_end(args);
 }

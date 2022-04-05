@@ -35,29 +35,32 @@ all: test.iso
 
 test.iso: kernel.elf limine
 	mkdir -p pack
-	cp kernel.elf limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-eltorito-efi.bin pack/
+	cp kernel.elf limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-cd-efi.bin pack/
 	xorriso -as mkisofs -b limine-cd.bin \
         -no-emul-boot -boot-load-size 4 -boot-info-table \
-        --efi-boot limine-eltorito-efi.bin \
+        --efi-boot limine-cd-efi.bin \
         -efi-boot-part --efi-boot-image --protective-msdos-label \
         pack -o $@
-	limine/limine-install $@
+	limine/limine-deploy $@
 
 limine:
-	git clone https://github.com/limine-bootloader/limine.git --branch=v2.0-branch-binary --depth=1
+	git clone https://github.com/limine-bootloader/limine.git --branch=v3.0-branch-binary --depth=1
 	make -C limine
+
+limine.h:
+	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
 
 kernel.elf: $(OBJ)
 	$(LD) $(OBJ) $(LDFLAGS) $(INTERNALLDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
 
-%.o: %.c
+%.o: %.c limine.h
 	$(CC) $(CFLAGS) $(INTERNALCFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
-	rm -rf kernel.elf test.iso $(OBJ) $(HEADER_DEPS)
+	rm -rf kernel.elf test.iso $(OBJ) $(HEADER_DEPS) pack
 
 .PHONY: distclean
 distclean: clean

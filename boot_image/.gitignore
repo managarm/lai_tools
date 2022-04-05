@@ -3,4 +3,5 @@
 *.elf
 *.iso
 limine
+limine.h
 pack

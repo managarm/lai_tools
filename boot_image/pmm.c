@@ -5,38 +5,38 @@
 #include <pmm.h>
 #include <print.h>
 #include <bit.h>
-#include <stivale2.h>
+#include <limine.h>
 
 static const char *memmap_type(uint32_t type) {
     switch (type) {
-        case STIVALE2_MMAP_USABLE:
+        case LIMINE_MEMMAP_USABLE:
             return "Usable RAM";
-        case STIVALE2_MMAP_RESERVED:
+        case LIMINE_MEMMAP_RESERVED:
             return "Reserved";
-        case STIVALE2_MMAP_ACPI_RECLAIMABLE:
+        case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
             return "ACPI reclaimable";
-        case STIVALE2_MMAP_ACPI_NVS:
+        case LIMINE_MEMMAP_ACPI_NVS:
             return "ACPI NVS";
-        case STIVALE2_MMAP_BAD_MEMORY:
+        case LIMINE_MEMMAP_BAD_MEMORY:
             return "Bad memory";
-        case STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE:
+        case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
             return "Bootloader reclaimable";
-        case STIVALE2_MMAP_KERNEL_AND_MODULES:
+        case LIMINE_MEMMAP_KERNEL_AND_MODULES:
             return "Kernel/Modules";
-        case STIVALE2_MMAP_FRAMEBUFFER:
+        case LIMINE_MEMMAP_FRAMEBUFFER:
             return "Framebuffer";
         default:
             return "???";
     }
 }
 
-void print_memmap(struct stivale2_mmap_entry *mm, size_t size) {
+void print_memmap(struct limine_memmap_entry **mm, size_t size) {
     for (size_t i = 0; i < size; i++) {
         print("[%X -> %X] : %X  <%s>\n",
-              mm[i].base,
-              mm[i].base + mm[i].length,
-              mm[i].length,
-              memmap_type(mm[i].type));
+              mm[i]->base,
+              mm[i]->base + mm[i]->length,
+              mm[i]->length,
+              memmap_type(mm[i]->type));
     }
 }
 
@@ -44,28 +44,24 @@ static void *bitmap;
 static size_t last_used_index = 0;
 static uintptr_t highest_addr = 0;
 
-void pmm_reclaim_memory(struct stivale2_mmap_entry *memmap, size_t memmap_entries) {
-    for (size_t i = 0; i < memmap_entries; i++) {
-        if (memmap[i].type != STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)
-            continue;
+static volatile struct limine_memmap_request memmap_req = {
+    .id = LIMINE_MEMMAP_REQUEST,
+    .revision = 0
+};
 
-        pmm_free((void*)memmap[i].base, memmap[i].length / PAGE_SIZE);
+void pmm_init(void) {
+    struct limine_memmap_entry **memmap = memmap_req.response->entries;
+    size_t memmap_entries = memmap_req.response->entry_count;
 
-        print("pmm: Reclaimed %U pages at %X\n", memmap[i].length / PAGE_SIZE,
-                                                 memmap[i].base);
-    }
-}
-
-void pmm_init(struct stivale2_mmap_entry *memmap, size_t memmap_entries) {
     print_memmap(memmap, memmap_entries);
 
     // First, calculate how big the bitmap needs to be.
     for (size_t i = 0; i < memmap_entries; i++) {
-        if (memmap[i].type != STIVALE2_MMAP_USABLE
-         && memmap[i].type != STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)
+        if (memmap[i]->type != LIMINE_MEMMAP_USABLE
+         && memmap[i]->type != LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE)
             continue;
 
-        uintptr_t top = memmap[i].base + memmap[i].length;
+        uintptr_t top = memmap[i]->base + memmap[i]->length;
 
         if (top > highest_addr)
             highest_addr = top;
@@ -75,17 +71,17 @@ void pmm_init(struct stivale2_mmap_entry *memmap, size_t memmap_entries) {
 
     // Second, find a location with enough free pages to host the bitmap.
     for (size_t i = 0; i < memmap_entries; i++) {
-        if (memmap[i].type != STIVALE2_MMAP_USABLE)
+        if (memmap[i]->type != LIMINE_MEMMAP_USABLE)
             continue;
 
-        if (memmap[i].length >= bitmap_size) {
-            bitmap = (void *)(memmap[i].base + MEM_PHYS_OFFSET);
+        if (memmap[i]->length >= bitmap_size) {
+            bitmap = (void *)(memmap[i]->base + MEM_PHYS_OFFSET);
 
             // Initialise entire bitmap to 1 (non-free)
             memset(bitmap, 0xff, bitmap_size);
 
-            memmap[i].length -= bitmap_size;
-            memmap[i].base += bitmap_size;
+            memmap[i]->length -= bitmap_size;
+            memmap[i]->base += bitmap_size;
 
             break;
         }
@@ -93,11 +89,11 @@ void pmm_init(struct stivale2_mmap_entry *memmap, size_t memmap_entries) {
 
     // Third, populate free bitmap entries according to memory map.
     for (size_t i = 0; i < memmap_entries; i++) {
-        if (memmap[i].type != STIVALE2_MMAP_USABLE)
+        if (memmap[i]->type != LIMINE_MEMMAP_USABLE)
             continue;
 
-        for (uintptr_t j = 0; j < memmap[i].length; j += PAGE_SIZE)
-            bitmap_unset(bitmap, (memmap[i].base + j) / PAGE_SIZE);
+        for (uintptr_t j = 0; j < memmap[i]->length; j += PAGE_SIZE)
+            bitmap_unset(bitmap, (memmap[i]->base + j) / PAGE_SIZE);
     }
 }
 

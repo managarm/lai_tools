@@ -9,6 +9,7 @@
 #include <acpispec/tables.h>
 #include <lai/helpers/sci.h>
 #include <lai/drivers/ec.h>
+#include <limine.h>
 
 rsdp_t *rsdp;
 rsdt_t *rsdt;
@@ -74,10 +75,20 @@ static void sci_handler(void *p) {
     pic_eoi(sci_irq);
 }
 
-void init_acpi(uintptr_t _rsdp) {
+static volatile struct limine_rsdp_request rsdp_req = {
+    .id = LIMINE_RSDP_REQUEST,
+    .revision = 0
+};
+
+void init_acpi(void) {
     print("acpi: Initialising...\n");
 
-    rsdp = (void *)_rsdp;
+    if (rsdp_req.response == NULL) {
+        print("No ACPI?\n");
+        for (;;);
+    }
+
+    rsdp = rsdp_req.response->address;
 
     if (rsdp->rev >= 2 && rsdp->xsdt_addr) {
         use_xsdt = 1;
