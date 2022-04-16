@@ -1,34 +1,46 @@
-CC ?= cc
-LD ?= ld
+define DEFAULT_VAR =
+    ifeq ($(origin $1), default)
+        override $(1) := $(2)
+    endif
+    ifeq ($(origin $1), undefined)
+        override $(1) := $(2)
+    endif
+endef
 
-CFLAGS ?= -Wall -Wextra -O2 -pipe
+$(eval $(call DEFAULT_VAR,CC,cc))
+$(eval $(call DEFAULT_VAR,LD,ld))
+
+CFLAGS ?= -Wall -Wextra -O2 -g -pipe
 LDFLAGS ?=
 
-INTERNALLDFLAGS :=          \
+override INTERNALLDFLAGS := \
 	-Tlinker.ld             \
 	-nostdlib               \
 	-z max-page-size=0x1000 \
-	-ztext
+	-static
 
-INTERNALCFLAGS  :=       \
-	-I.                  \
-	-I./lai/include      \
-	-std=gnu11           \
-	-ffreestanding       \
-	-fno-stack-protector \
-	-fno-pic             \
-	-mno-80387           \
-	-mno-mmx             \
-	-mno-3dnow           \
-	-mno-sse             \
-	-mno-sse2            \
-	-mno-red-zone        \
-	-mcmodel=kernel      \
+override INTERNALCFLAGS := \
+	-I.                    \
+	-I./lai/include        \
+	-std=gnu11             \
+	-ffreestanding         \
+	-fno-stack-protector   \
+	-fno-stack-check       \
+	-fno-pic               \
+	-fno-pie               \
+	-mabi=sysv             \
+	-mno-80387             \
+	-mno-mmx               \
+	-mno-3dnow             \
+	-mno-sse               \
+	-mno-sse2              \
+	-mno-red-zone          \
+	-mcmodel=kernel        \
 	-MMD
 
-CFILES      := $(shell find -L ./ -type f -name '*.c' | grep -v limine | grep -v lai_tools)
-OBJ         := $(CFILES:.c=.o)
-HEADER_DEPS := $(CFILES:.c=.d)
+override CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine)
+override OBJ := $(CFILES:.c=.o)
+override HEADER_DEPS := $(CFILES:.c=.d)
 
 .PHONY: all
 all: test.iso
@@ -54,7 +66,6 @@ kernel.elf: $(OBJ)
 	$(LD) $(OBJ) $(LDFLAGS) $(INTERNALLDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
-
 %.o: %.c limine.h
 	$(CC) $(CFLAGS) $(INTERNALCFLAGS) -c $< -o $@
 
@@ -64,7 +75,7 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -rf limine
+	rm -rf limine limine.h
 
 .PHONY: run
 run:
