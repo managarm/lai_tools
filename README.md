@@ -1,8 +1,5 @@
 # LAI userspace tools
 
-[![Build Status](https://travis-ci.com/managarm/lai_tools.svg?branch=master)](https://travis-ci.com/managarm/lai_tools)
-[![Coverage Status](https://coveralls.io/repos/github/managarm/lai_tools/badge.svg?branch=master)](https://coveralls.io/github/managarm/lai_tools?branch=master)
-
 ## Prerequisites
 
 meson is required to build this project.
@@ -28,6 +25,6 @@ $ cd boot_image
 $ make clean all
 ```
 
-A bootable file called `test.hdd` should be created in the `boot_image` directory.
-Test it in QEMU or any other virtualisation solution, or write it onto a drive
+A bootable ISO file called `test.iso` should be created in the `boot_image` directory.
+Test it in QEMU (`make run`) or any other virtualisation solution, or write it onto a drive
 (e.g.: a USB stick) by means of `cat` or `dd`.
