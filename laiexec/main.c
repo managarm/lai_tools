@@ -168,7 +168,7 @@ void *laihost_scan(const char *name, size_t index) {
     // First, try to find an un-indexed table.
     if(index <= 0) {
         if(asprintf(&path, "%s/%s.dat", path_arg, name) < 0) {
-            fprintf(stderr, "asprintf() failed");
+            fprintf(stderr, "asprintf() failed\n");
             abort();
         }
         for(size_t i = 0; path[i]; i++)
@@ -182,7 +182,7 @@ void *laihost_scan(const char *name, size_t index) {
     // If that fails, find an indexed table.
     if(index >= 0 && !buffer) {
         if(asprintf(&path, "%s/%s%zu.dat", path_arg, name, index) < 0) {
-            fprintf(stderr, "asprintf() failed");
+            fprintf(stderr, "asprintf() failed\n");
             abort();
         }
         for(size_t i = 0; path[i]; i++)
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
 
         lai_init_state(&state);
         if (lai_populate(root_node, &amls, &state)) {
-            printf("Execution failure in table-level code");
+            printf("Execution failure in table-level code\n");
             exit(1);
         }
         lai_finalize_state(&state);
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
         lai_init_state(&state);
         printf("Executing _SB_._INI\n");
         if (lai_eval(NULL, handle, &state)) {
-            printf("Execution failure in _SB_._INI");
+            printf("Execution failure in _SB_._INI\n");
             exit(1);
         }
         printf("Execution finished successfully\n");

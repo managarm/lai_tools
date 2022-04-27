@@ -22,6 +22,7 @@ aml_test_cases = [
     'calls',
     'comparison',
     'computational_data',
+    'duplicate_node',
     'event',
     'implicit_semantics',
     'implicit_conversion',
@@ -47,6 +48,7 @@ aml_test_cases = [
     'tointeger',
     'findsetbit',
     'tostring',
+    'undefined_object',
     'objecttype',
     'opregion'
 ]

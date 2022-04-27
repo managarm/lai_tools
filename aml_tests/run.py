@@ -176,6 +176,7 @@ class Verifier:
         self.process = None
         self.c = 0 # Current index into self.expected.
         self.errors = 0 # Number of errors.
+        self.expected_process_return = 0 # Expected return code
 
         # Extract the expected output from comments in the ASL file.
         expected_script = ''
@@ -208,6 +209,16 @@ class Verifier:
                     port = parse_int(tokens[2])
                     value = parse_int(tokens[4])
                     self.expected.append((Action.PIO_READ, PioData(bits, port, value)))
+                elif line.startswith('expect-crash:'):
+                    tokens = line[len('expect-crash:'):].strip().split(' ')
+                    assert len(tokens) == 1
+                    
+                    if tokens[0] == 'yes':
+                        self.expected_process_return = 1
+                    elif tokens[0] == 'no':
+                        self.expected_process_return = 0
+                    else:
+                        raise RuntimeError("Unexpected expect-crash value '{}'".format(tokens[0]))
                 else:
                     raise RuntimeError("Unexpected //! line '{}'".format(line))
 
@@ -217,7 +228,7 @@ class Verifier:
         os.close(fd)
 
         # Note that we disable optimizations to that LAI sees the source ASL.
-        subprocess.check_call(['iasl', '-p', aml_path, '-oa', self.path],
+        subprocess.check_call(['iasl', '-f', '-p', aml_path, '-oa', self.path],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Run the LAI's interpreter on the AML and parse the trace.
@@ -355,7 +366,7 @@ class Verifier:
         elif self.process.returncode:
             message = 'failure ({})'.format(self.process.returncode)
 
-        print_colored(bad_color if self.process.returncode else good_color,
+        print_colored(bad_color if (self.process.returncode != self.expected_process_return) else good_color,
                 " -> laiexec returned {}, verifying trace...".format(message))
 
         print_colored(bad_color if self.errors else good_color,
@@ -370,7 +381,7 @@ class Verifier:
             return False
         elif self.errors:
             return False
-        elif self.process.returncode:
+        elif self.process.returncode != self.expected_process_return:
             return False
         return True
 
