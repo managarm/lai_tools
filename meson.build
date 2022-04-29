@@ -31,6 +31,7 @@ aml_test_cases = [
     'match',
     'mid',
     'mutex',
+    'negatebitwise',
     'package',
     'varpackage',
     'power_res',
