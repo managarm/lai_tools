@@ -50,6 +50,7 @@ aml_test_cases = [
     'findsetbit',
     'tostring',
     'undefined_object',
+    'unresolved_scope_node',
     'objecttype',
     'opregion'
 ]
