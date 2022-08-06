@@ -12,31 +12,33 @@ $(eval $(call DEFAULT_VAR,LD,ld))
 
 CFLAGS ?= -Wall -Wextra -O2 -g -pipe
 LDFLAGS ?=
+CPPFLAGS ?=
 
-override INTERNALLDFLAGS := \
-	-Tlinker.ld             \
-	-nostdlib               \
-	-z max-page-size=0x1000 \
-	-static
+override CFLAGS +=       \
+    -I.                  \
+    -I./lai/include      \
+    -std=gnu11           \
+    -ffreestanding       \
+    -fno-stack-protector \
+    -fno-stack-check     \
+    -fno-pie             \
+    -fno-pic             \
+    -m64                 \
+    -march=x86-64        \
+    -mabi=sysv           \
+    -mno-80387           \
+    -mno-mmx             \
+    -mno-sse             \
+    -mno-sse2            \
+    -mno-red-zone        \
+    -mcmodel=kernel      \
+    -MMD
 
-override INTERNALCFLAGS := \
-	-I.                    \
-	-I./lai/include        \
-	-std=gnu11             \
-	-ffreestanding         \
-	-fno-stack-protector   \
-	-fno-stack-check       \
-	-fno-pic               \
-	-fno-pie               \
-	-mabi=sysv             \
-	-mno-80387             \
-	-mno-mmx               \
-	-mno-3dnow             \
-	-mno-sse               \
-	-mno-sse2              \
-	-mno-red-zone          \
-	-mcmodel=kernel        \
-	-MMD
+override LDFLAGS +=         \
+    -nostdlib               \
+    -static                 \
+    -z max-page-size=0x1000 \
+    -T linker.ld
 
 override CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine)
 override OBJ := $(CFILES:.c=.o)
@@ -63,11 +65,11 @@ limine.h:
 	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
 
 kernel.elf: $(OBJ)
-	$(LD) $(OBJ) $(LDFLAGS) $(INTERNALLDFLAGS) -o $@
+	$(LD) $(OBJ) $(LDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
 %.o: %.c limine.h
-	$(CC) $(CFLAGS) $(INTERNALCFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:

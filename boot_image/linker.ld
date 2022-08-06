@@ -9,7 +9,6 @@ ENTRY(_start)
 /* MMU permissions */
 PHDRS
 {
-    null    PT_NULL    FLAGS(0) ;                   /* Null segment */
     text    PT_LOAD    FLAGS((1 << 0) | (1 << 2)) ; /* Execute + Read */
     rodata  PT_LOAD    FLAGS((1 << 2)) ;            /* Read only */
     data    PT_LOAD    FLAGS((1 << 1) | (1 << 2)) ; /* Write + Read */
@@ -24,25 +23,30 @@ SECTIONS
     . = 0xffffffff80000000;
 
     .text : {
-        *(.text*)
+        *(.text .text.*)
     } :text
 
     /* Move to the next memory page for .rodata */
     . += CONSTANT(MAXPAGESIZE);
 
     .rodata : {
-        *(.rodata*)
+        *(.rodata .rodata.*)
     } :rodata
 
     /* Move to the next memory page for .data */
     . += CONSTANT(MAXPAGESIZE);
 
     .data : {
-        *(.data*)
+        *(.data .data.*)
     } :data
 
     .bss : {
         *(COMMON)
-        *(.bss*)
+        *(.bss .bss.*)
     } :data
+
+    /* Discard notes since they may cause issues on some hosts. */
+    /DISCARD/ : {
+        *(.note .note.*)
+    }
 }
