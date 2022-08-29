@@ -1,8 +1,8 @@
 define DEFAULT_VAR =
-    ifeq ($(origin $1), default)
+    ifeq ($(origin $1),default)
         override $(1) := $(2)
     endif
-    ifeq ($(origin $1), undefined)
+    ifeq ($(origin $1),undefined)
         override $(1) := $(2)
     endif
 endef
@@ -10,17 +10,16 @@ endef
 $(eval $(call DEFAULT_VAR,CC,cc))
 $(eval $(call DEFAULT_VAR,LD,ld))
 
-CFLAGS ?= -Wall -Wextra -O2 -g -pipe
+CFLAGS ?= -g -O2 -pipe -Wall -Wextra
 LDFLAGS ?=
 CPPFLAGS ?=
 
 override CFLAGS +=       \
-    -I.                  \
-    -I./lai/include      \
     -std=gnu11           \
     -ffreestanding       \
     -fno-stack-protector \
     -fno-stack-check     \
+    -fno-lto             \
     -fno-pie             \
     -fno-pic             \
     -m64                 \
@@ -32,11 +31,14 @@ override CFLAGS +=       \
     -mno-sse2            \
     -mno-red-zone        \
     -mcmodel=kernel      \
-    -MMD
+    -MMD                 \
+    -I.                  \
+    -I./lai/include
 
 override LDFLAGS +=         \
     -nostdlib               \
     -static                 \
+    -m elf_x86_64           \
     -z max-page-size=0x1000 \
     -T linker.ld
 
@@ -65,7 +67,8 @@ limine.h:
 	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
 
 kernel.elf: $(OBJ)
-	$(LD) $(OBJ) $(LDFLAGS) -o $@
+	$(LD) $(OBJ) $(LDFLAGS) -no-pie -o $@ || \
+	    $(LD) $(OBJ) $(LDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
 %.o: %.c limine.h
