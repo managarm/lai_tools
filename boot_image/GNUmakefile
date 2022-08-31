@@ -42,6 +42,10 @@ override LDFLAGS +=         \
     -z max-page-size=0x1000 \
     -T linker.ld
 
+ifeq ($(shell $(LD) --help 2>&1 | grep 'no-pie' >/dev/null 2>&1; echo $$?),0)
+    override LDFLAGS += -no-pie
+endif
+
 override CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine)
 override OBJ := $(CFILES:.c=.o)
 override HEADER_DEPS := $(CFILES:.c=.d)
@@ -67,8 +71,7 @@ limine.h:
 	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
 
 kernel.elf: $(OBJ)
-	$(LD) $(OBJ) $(LDFLAGS) -no-pie -o $@ || \
-	    $(LD) $(OBJ) $(LDFLAGS) -o $@
+	$(LD) $(OBJ) $(LDFLAGS) -o $@
 
 -include $(HEADER_DEPS)
 %.o: %.c limine.h
