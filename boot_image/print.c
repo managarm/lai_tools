@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <print.h>
 #include <lib.h>
-#include <cio.h>
 #include <limine.h>
 
 static const char *base_digits = "0123456789abcdef";
@@ -115,9 +114,6 @@ void print(const char *fmt, ...) {
     // We allocate on the stack to be thread saf *and* avoid using the allocator
     char buf[MAX_PRINT_BUF_SIZE];
     size_t len = vsnprint(buf, MAX_PRINT_BUF_SIZE, fmt, args);
-
-    for (size_t i = 0; i < len; i++)
-        port_out_b(0xe9, buf[i]);
 
     if (terminal_request.response != NULL
      && terminal_request.response->terminal_count > 0) {
