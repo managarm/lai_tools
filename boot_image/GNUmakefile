@@ -1,3 +1,5 @@
+override MAKEFLAGS += -rR
+
 define DEFAULT_VAR =
     ifeq ($(origin $1),default)
         override $(1) := $(2)
@@ -30,10 +32,13 @@ override CFLAGS +=       \
     -mno-sse             \
     -mno-sse2            \
     -mno-red-zone        \
-    -mcmodel=kernel      \
-    -MMD                 \
-    -I.                  \
-    -I./lai/include
+    -mcmodel=kernel
+
+override CPPFLAGS := \
+    -I.              \
+    -I./lai/include  \
+    $(CPPFLAGS)      \
+    -MMD
 
 override LDFLAGS +=         \
     -nostdlib               \
@@ -65,7 +70,7 @@ test.iso: kernel.elf limine
 
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.x-branch-binary --depth=1
-	make -C limine
+	$(MAKE) -C limine
 
 limine.h:
 	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
@@ -75,7 +80,7 @@ kernel.elf: $(OBJ)
 
 -include $(HEADER_DEPS)
 %.o: %.c limine.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
