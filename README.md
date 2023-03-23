@@ -25,6 +25,6 @@ $ cd boot_image
 $ make clean all
 ```
 
-A bootable ISO file called `test.iso` should be created in the `boot_image` directory.
+A bootable ISO file called `lai_test.iso` should be created in the `boot_image` directory.
 Test it in QEMU (`make run`) or any other virtualisation solution, or write it onto a drive
 (e.g.: a USB stick) by means of `cat` or `dd`.
