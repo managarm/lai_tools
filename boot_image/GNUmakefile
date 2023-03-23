@@ -1,95 +1,78 @@
+# Nuke built-in rules and variables.
 override MAKEFLAGS += -rR
 
-define DEFAULT_VAR =
-    ifeq ($(origin $1),default)
-        override $(1) := $(2)
-    endif
-    ifeq ($(origin $1),undefined)
-        override $(1) := $(2)
-    endif
-endef
-
-$(eval $(call DEFAULT_VAR,CC,cc))
-$(eval $(call DEFAULT_VAR,LD,ld))
-
-CFLAGS ?= -g -O2 -pipe -Wall -Wextra
-LDFLAGS ?=
-CPPFLAGS ?=
-
-override CFLAGS +=       \
-    -std=gnu11           \
-    -ffreestanding       \
-    -fno-stack-protector \
-    -fno-stack-check     \
-    -fno-lto             \
-    -fno-pie             \
-    -fno-pic             \
-    -m64                 \
-    -march=x86-64        \
-    -mabi=sysv           \
-    -mno-80387           \
-    -mno-mmx             \
-    -mno-sse             \
-    -mno-sse2            \
-    -mno-red-zone        \
-    -mcmodel=kernel
-
-override CPPFLAGS := \
-    -I.              \
-    -I./lai/include  \
-    $(CPPFLAGS)      \
-    -MMD
-
-override LDFLAGS +=         \
-    -nostdlib               \
-    -static                 \
-    -m elf_x86_64           \
-    -z max-page-size=0x1000 \
-    -T linker.ld
-
-ifeq ($(shell $(LD) --help 2>&1 | grep 'no-pie' >/dev/null 2>&1; echo $$?),0)
-    override LDFLAGS += -no-pie
-endif
-
-override CFILES := $(shell find -L ./ -type f -name '*.c' | grep -v limine)
-override OBJ := $(CFILES:.c=.o)
-override HEADER_DEPS := $(CFILES:.c=.d)
-
 .PHONY: all
-all: test.iso
+all: barebones.iso
 
-test.iso: kernel.elf limine
-	mkdir -p pack
-	cp kernel.elf limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-cd-efi.bin pack/
-	xorriso -as mkisofs -b limine-cd.bin \
-        -no-emul-boot -boot-load-size 4 -boot-info-table \
-        --efi-boot limine-cd-efi.bin \
-        -efi-boot-part --efi-boot-image --protective-msdos-label \
-        pack -o $@
-	limine/limine-deploy $@
+.PHONY: all-hdd
+all-hdd: barebones.hdd
+
+.PHONY: run
+run: barebones.iso
+	qemu-system-x86_64 -M q35 -m 2G -cdrom barebones.iso -boot d
+
+.PHONY: run-uefi
+run-uefi: ovmf-x64 barebones.iso
+	qemu-system-x86_64 -M q35 -m 2G -bios ovmf-x64/OVMF.fd -cdrom barebones.iso -boot d
+
+.PHONY: run-hdd
+run-hdd: barebones.hdd
+	qemu-system-x86_64 -M q35 -m 2G -hda barebones.hdd
+
+.PHONY: run-hdd-uefi
+run-hdd-uefi: ovmf-x64 barebones.hdd
+	qemu-system-x86_64 -M q35 -m 2G -bios ovmf-x64/OVMF.fd -hda barebones.hdd
+
+ovmf-x64:
+	mkdir -p ovmf-x64
+	cd ovmf-x64 && curl -o OVMF-X64.zip https://efi.akeo.ie/OVMF/OVMF-X64.zip && 7z x OVMF-X64.zip
 
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.x-branch-binary --depth=1
 	$(MAKE) -C limine
 
-limine.h:
-	curl https://raw.githubusercontent.com/limine-bootloader/limine/trunk/limine.h -o $@
+.PHONY: kernel
+kernel:
+	$(MAKE) -C kernel
 
-kernel.elf: $(OBJ)
-	$(LD) $(OBJ) $(LDFLAGS) -o $@
+barebones.iso: limine kernel
+	rm -rf iso_root
+	mkdir -p iso_root
+	cp kernel/kernel.elf \
+		limine.cfg limine/limine.sys limine/limine-cd.bin limine/limine-cd-efi.bin iso_root/
+	xorriso -as mkisofs -b limine-cd.bin \
+		-no-emul-boot -boot-load-size 4 -boot-info-table \
+		--efi-boot limine-cd-efi.bin \
+		-efi-boot-part --efi-boot-image --protective-msdos-label \
+		iso_root -o barebones.iso
+	limine/limine-deploy barebones.iso
+	rm -rf iso_root
 
--include $(HEADER_DEPS)
-%.o: %.c limine.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+barebones.hdd: limine kernel
+	rm -f barebones.hdd
+	dd if=/dev/zero bs=1M count=0 seek=64 of=barebones.hdd
+	parted -s barebones.hdd mklabel gpt
+	parted -s barebones.hdd mkpart ESP fat32 2048s 100%
+	parted -s barebones.hdd set 1 esp on
+	limine/limine-deploy barebones.hdd
+	sudo losetup -Pf --show barebones.hdd >loopback_dev
+	sudo mkfs.fat -F 32 `cat loopback_dev`p1
+	mkdir -p img_mount
+	sudo mount `cat loopback_dev`p1 img_mount
+	sudo mkdir -p img_mount/EFI/BOOT
+	sudo cp -v kernel/kernel.elf limine.cfg limine/limine.sys img_mount/
+	sudo cp -v limine/BOOTX64.EFI img_mount/EFI/BOOT/
+	sync
+	sudo umount img_mount
+	sudo losetup -d `cat loopback_dev`
+	rm -rf loopback_dev img_mount
 
 .PHONY: clean
 clean:
-	rm -rf kernel.elf test.iso $(OBJ) $(HEADER_DEPS) pack
+	rm -rf iso_root barebones.iso barebones.hdd
+	$(MAKE) -C kernel clean
 
 .PHONY: distclean
 distclean: clean
-	rm -rf limine limine.h
-
-.PHONY: run
-run:
-	qemu-system-x86_64 -M q35 -net none -enable-kvm -cpu host -hda test.iso -debugcon stdio
+	rm -rf limine ovmf-x64
+	$(MAKE) -C kernel distclean

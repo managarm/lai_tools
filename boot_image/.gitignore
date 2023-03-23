@@ -1,7 +1,4 @@
-*.d
-*.o
-*.elf
+/limine
+/ovmf-x64
 *.iso
-limine
-limine.h
-pack
+*.hdd
