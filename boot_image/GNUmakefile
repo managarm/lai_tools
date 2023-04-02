@@ -29,12 +29,15 @@ ovmf:
 	mkdir -p ovmf
 	cd ovmf && curl -Lo OVMF-X64.zip https://efi.akeo.ie/OVMF/OVMF-X64.zip && unzip OVMF-X64.zip
 
+kernel/flanterm:
+	git clone https://github.com/mintsuki/flanterm.git --depth=1 kernel/flanterm
+
 limine:
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.x-branch-binary --depth=1
 	$(MAKE) -C limine
 
 .PHONY: kernel
-kernel:
+kernel: kernel/flanterm
 	$(MAKE) -C kernel
 
 $(IMAGE_NAME).iso: limine kernel
@@ -78,3 +81,4 @@ clean:
 distclean: clean
 	rm -rf limine ovmf
 	$(MAKE) -C kernel distclean
+	rm -rf kernel/flanterm

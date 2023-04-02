@@ -7,6 +7,8 @@
 #include <bit.h>
 #include <limine.h>
 
+bool pmm_initialised = false;
+
 static const char *memmap_type(uint32_t type) {
     switch (type) {
         case LIMINE_MEMMAP_USABLE:
@@ -95,6 +97,8 @@ void pmm_init(void) {
         for (uintptr_t j = 0; j < memmap[i]->length; j += PAGE_SIZE)
             bitmap_unset(bitmap, (memmap[i]->base + j) / PAGE_SIZE);
     }
+
+    pmm_initialised = true;
 }
 
 static void *inner_alloc(size_t count, size_t limit) {

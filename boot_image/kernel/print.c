@@ -4,6 +4,9 @@
 #include <print.h>
 #include <lib.h>
 #include <limine.h>
+#include <pmm.h>
+#include <flanterm/backends/fb.h>
+#include <lai/host.h>
 
 static const char *base_digits = "0123456789abcdef";
 
@@ -100,26 +103,51 @@ static void prn_x(char *print_buf, size_t limit, size_t *print_buf_i, uint64_t x
     prn_str(print_buf, limit, print_buf_i, buf + i);
 }
 
-static volatile struct limine_terminal_request terminal_request = {
-    .id = LIMINE_TERMINAL_REQUEST,
+static volatile struct limine_framebuffer_request framebuffer_request = {
+    .id = LIMINE_FRAMEBUFFER_REQUEST,
     .revision = 0
 };
 
 #define MAX_PRINT_BUF_SIZE 256
 
 void print(const char *fmt, ...) {
+    if (!pmm_initialised) {
+        return;
+    }
+
+    if (framebuffer_request.response == NULL) {
+        return;
+    }
+
+    if (framebuffer_request.response->framebuffer_count < 1) {
+        return;
+    }
+
+    struct limine_framebuffer *fb = framebuffer_request.response->framebuffers[0];
+
+    static struct flanterm_context *term = NULL;
+    if (term == NULL) {
+        term = flanterm_fb_init(
+            laihost_malloc,
+            fb->address, fb->width, fb->height, fb->pitch,
+            NULL,
+            NULL, NULL,
+            NULL, NULL,
+            NULL, NULL,
+            NULL, 0, 0, 1,
+            1, 1,
+            0
+        );
+    }
+
     va_list args;
     va_start(args, fmt);
 
-    // We allocate on the stack to be thread saf *and* avoid using the allocator
+    // We allocate on the stack to be thread safe *and* avoid using the allocator
     char buf[MAX_PRINT_BUF_SIZE];
     size_t len = vsnprint(buf, MAX_PRINT_BUF_SIZE, fmt, args);
 
-    if (terminal_request.response != NULL
-     && terminal_request.response->terminal_count > 0) {
-        struct limine_terminal *terminal = terminal_request.response->terminals[0];
-        terminal_request.response->write(terminal, buf, len);
-    }
+    flanterm_write(term, buf, len);
 
     va_end(args);
 }
