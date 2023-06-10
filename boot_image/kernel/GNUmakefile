@@ -70,6 +70,9 @@ override CPPFLAGS := \
     -MMD \
     -MP
 
+flanterm/backends/fb.o: override CPPFLAGS += \
+    -DFLANTERM_FB_DISABLE_BUMP_ALLOC
+
 # Internal linker flags that should not be changed by the user.
 override LDFLAGS += \
     -nostdlib \

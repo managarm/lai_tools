@@ -129,6 +129,7 @@ void print(const char *fmt, ...) {
     if (term == NULL) {
         term = flanterm_fb_init(
             laihost_malloc,
+            laihost_free,
             fb->address, fb->width, fb->height, fb->pitch,
             NULL,
             NULL, NULL,
