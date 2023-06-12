@@ -70,7 +70,7 @@ override CPPFLAGS := \
     -MMD \
     -MP
 
-flanterm/backends/fb.o: override CPPFLAGS += \
+flanterm/backends/fb.c.o: override CPPFLAGS += \
     -DFLANTERM_FB_DISABLE_BUMP_ALLOC
 
 # Internal linker flags that should not be changed by the user.
@@ -96,7 +96,7 @@ override NASMFLAGS += \
 override CFILES := $(shell find -L . -type f -name '*.c')
 override ASFILES := $(shell find -L . -type f -name '*.S')
 override NASMFILES := $(shell find -L . -type f -name '*.asm')
-override OBJ := $(CFILES:.c=.o) $(ASFILES:.S=.o) $(NASMFILES:.asm=.o)
+override OBJ := $(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o)
 override HEADER_DEPS := $(CFILES:.c=.d) $(ASFILES:.S=.d)
 
 # Default target.
@@ -114,15 +114,15 @@ $(KERNEL): $(OBJ)
 -include $(HEADER_DEPS)
 
 # Compilation rules for *.c files.
-%.o: %.c limine.h
+%.c.o: %.c limine.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.S files.
-%.o: %.S limine.h
+%.S.o: %.S limine.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.asm (nasm) files.
-%.o: %.asm
+%.asm.o: %.asm
 	nasm $(NASMFLAGS) $< -o $@
 
 # Remove object files and the final executable.
