@@ -24,7 +24,7 @@ void *acpi_find_sdt(const char *signature, int index) {
 
     if (use_xsdt) {
         for (size_t i = 0; i < (xsdt->sdt.length - sizeof(acpi_sdt_t)) / 8; i++) {
-            ptr = (acpi_sdt_t *)((size_t)xsdt->sdt_ptr[i] + MEM_PHYS_OFFSET);
+            ptr = (acpi_sdt_t *)((size_t)xsdt->sdt_ptr[i] + pmm_hhdm_req.response->offset);
             if (!strncmp(ptr->signature, signature, 4)) {
                 if (cnt++ == index) {
                     print("acpi: Found \"%s\" at %X\n", signature, (size_t)ptr);
@@ -34,7 +34,7 @@ void *acpi_find_sdt(const char *signature, int index) {
         }
     } else {
         for (size_t i = 0; i < (rsdt->sdt.length - sizeof(acpi_sdt_t)) / 4; i++) {
-            ptr = (acpi_sdt_t *)((size_t)rsdt->sdt_ptr[i] + MEM_PHYS_OFFSET);
+            ptr = (acpi_sdt_t *)((size_t)rsdt->sdt_ptr[i] + pmm_hhdm_req.response->offset);
             if (!strncmp(ptr->signature, signature, 4)) {
                 if (cnt++ == index) {
                     print("acpi: Found \"%s\" at %X\n", signature, (size_t)ptr);
@@ -92,11 +92,11 @@ void init_acpi(void) {
 
     if (rsdp->rev >= 2 && rsdp->xsdt_addr) {
         use_xsdt = 1;
-        print("acpi: Found XSDT at %X\n", (uint32_t)rsdp->xsdt_addr + MEM_PHYS_OFFSET);
-        xsdt = (xsdt_t *)(size_t)(rsdp->xsdt_addr + MEM_PHYS_OFFSET);
+        print("acpi: Found XSDT at %X\n", (uint32_t)rsdp->xsdt_addr + pmm_hhdm_req.response->offset);
+        xsdt = (xsdt_t *)(size_t)(rsdp->xsdt_addr + pmm_hhdm_req.response->offset);
     } else {
-        print("acpi: Found RSDT at %X\n", (uint32_t)rsdp->rsdt_addr + MEM_PHYS_OFFSET);
-        rsdt = (rsdt_t *)(size_t)(rsdp->rsdt_addr + MEM_PHYS_OFFSET);
+        print("acpi: Found RSDT at %X\n", (uint32_t)rsdp->rsdt_addr + pmm_hhdm_req.response->offset);
+        rsdt = (rsdt_t *)(size_t)(rsdp->rsdt_addr + pmm_hhdm_req.response->offset);
     }
 
     madt_t *madt;

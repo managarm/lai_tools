@@ -4,10 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limine.h>
 
 #define PAGE_SIZE ((size_t)4096)
 
-#define MEM_PHYS_OFFSET ((size_t)0xffff800000000000)
+extern volatile struct limine_hhdm_request pmm_hhdm_req;
 
 void *pmm_alloc(size_t);
 void *pmm_allocz(size_t);

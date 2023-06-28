@@ -7,6 +7,10 @@
 #include <bit.h>
 #include <limine.h>
 
+volatile struct limine_hhdm_request pmm_hhdm_req = {
+    .id = LIMINE_HHDM_REQUEST
+};
+
 bool pmm_initialised = false;
 
 static const char *memmap_type(uint32_t type) {
@@ -77,7 +81,7 @@ void pmm_init(void) {
             continue;
 
         if (memmap[i]->length >= bitmap_size) {
-            bitmap = (void *)(memmap[i]->base + MEM_PHYS_OFFSET);
+            bitmap = (void *)(memmap[i]->base + pmm_hhdm_req.response->offset);
 
             // Initialise entire bitmap to 1 (non-free)
             memset(bitmap, 0xff, bitmap_size);
@@ -143,7 +147,7 @@ void *pmm_allocz(size_t count) {
     if (ret == NULL)
         return NULL;
 
-    uint64_t *ptr = (uint64_t *)(ret + MEM_PHYS_OFFSET);
+    uint64_t *ptr = (uint64_t *)(ret + pmm_hhdm_req.response->offset);
 
     for (size_t i = 0; i < count * (PAGE_SIZE / sizeof(uint64_t)); i++)
         ptr[i] = 0;

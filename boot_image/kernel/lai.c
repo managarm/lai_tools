@@ -67,7 +67,7 @@ void laihost_panic(const char *str) {
 void *laihost_malloc(size_t size) {
     if (size == 0)
         return (void *)0x8000000000000000;
-    return pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + MEM_PHYS_OFFSET;
+    return pmm_allocz(DIV_ROUNDUP(size, PAGE_SIZE)) + pmm_hhdm_req.response->offset;
 }
 
 void *laihost_realloc(void *old, size_t size, size_t oldsize) {
@@ -84,7 +84,7 @@ void *laihost_realloc(void *old, size_t size, size_t oldsize) {
 void laihost_free(void *p, size_t oldsize) {
     if (oldsize == 0)
         return;
-    pmm_free(p - MEM_PHYS_OFFSET, DIV_ROUNDUP(oldsize, PAGE_SIZE));
+    pmm_free(p - pmm_hhdm_req.response->offset, DIV_ROUNDUP(oldsize, PAGE_SIZE));
 }
 
 void *laihost_scan(const char *signature, size_t index) {
@@ -96,7 +96,7 @@ void *laihost_scan(const char *signature, size_t index) {
         }
         // Scan for the FADT
         acpi_fadt_t *fadt = (acpi_fadt_t *)acpi_find_sdt("FACP", 0);
-        void *dsdt = (char *)(size_t)fadt->dsdt + MEM_PHYS_OFFSET;
+        void *dsdt = (char *)(size_t)fadt->dsdt + pmm_hhdm_req.response->offset;
         print("acpi: Address of DSDT is %X\n", dsdt);
         return dsdt;
     } else {
@@ -137,6 +137,6 @@ void *laihost_map(size_t phys_addr, size_t count) {
     // all physical memory is mapped into the higher half, so we can just return
     // the physical address + the offset into the higher half.
     (void)count;
-    size_t virt_addr = phys_addr + MEM_PHYS_OFFSET;
+    size_t virt_addr = phys_addr + pmm_hhdm_req.response->offset;
     return (void *)virt_addr;
 }
