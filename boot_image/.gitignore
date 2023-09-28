@@ -3,4 +3,4 @@
 *.iso
 *.hdd
 
-/kernel/flanterm
+/kernel/src/flanterm
