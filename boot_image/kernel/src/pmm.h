@@ -8,7 +8,7 @@
 
 #define PAGE_SIZE ((size_t)4096)
 
-extern volatile struct limine_hhdm_request pmm_hhdm_req;
+extern struct limine_hhdm_request pmm_hhdm_req;
 
 void *pmm_alloc(size_t);
 void *pmm_allocz(size_t);

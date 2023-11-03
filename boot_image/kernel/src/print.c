@@ -103,7 +103,7 @@ static void prn_x(char *print_buf, size_t limit, size_t *print_buf_i, uint64_t x
     prn_str(print_buf, limit, print_buf_i, buf + i);
 }
 
-static volatile struct limine_framebuffer_request framebuffer_request = {
+struct limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
     .revision = 0
 };
