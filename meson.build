@@ -16,6 +16,7 @@ aml_test_cases = [
     'arithmetic',
     'bufferfields',
     'concatrestemplate',
+    'continue',
     'frombcd',
     'tobcd',
     'breakpoint',
