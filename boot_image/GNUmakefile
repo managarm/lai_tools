@@ -55,7 +55,7 @@ kernel/src/flanterm:
 	git clone https://github.com/mintsuki/flanterm.git --depth=1 kernel/src/flanterm
 
 limine:
-	git clone https://github.com/limine-bootloader/limine.git --branch=v6.x-branch-binary --depth=1
+	git clone https://github.com/limine-bootloader/limine.git --branch=binary --depth=1
 	$(MAKE) -C limine \
 		CC="$(HOST_CC)" \
 		CFLAGS="$(HOST_CFLAGS)" \
