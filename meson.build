@@ -15,7 +15,9 @@ run_py = find_program('aml_tests/run.py')
 aml_test_cases = [
     'arithmetic',
     'bufferfields',
+    'break',
     'concatrestemplate',
+    'continue',
     'frombcd',
     'tobcd',
     'breakpoint',
