@@ -9,7 +9,7 @@
 #include <lai/core.h>
 #include <lai/helpers/sci.h>
 
-LIMINE_BASE_REVISION(1)
+static volatile LIMINE_BASE_REVISION(1);
 
 void _start(void) {
     if (LIMINE_BASE_REVISION_SUPPORTED == false) {

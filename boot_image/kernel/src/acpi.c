@@ -75,7 +75,7 @@ static void sci_handler(void *p) {
     pic_eoi(sci_irq);
 }
 
-struct limine_rsdp_request rsdp_req = {
+static volatile struct limine_rsdp_request rsdp_req = {
     .id = LIMINE_RSDP_REQUEST,
     .revision = 0
 };

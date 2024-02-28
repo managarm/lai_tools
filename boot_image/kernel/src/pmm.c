@@ -7,7 +7,7 @@
 #include <bit.h>
 #include <limine.h>
 
-struct limine_hhdm_request pmm_hhdm_req = {
+volatile struct limine_hhdm_request pmm_hhdm_req = {
     .id = LIMINE_HHDM_REQUEST
 };
 
@@ -50,7 +50,7 @@ static void *bitmap;
 static size_t last_used_index = 0;
 static uintptr_t highest_addr = 0;
 
-struct limine_memmap_request memmap_req = {
+static volatile struct limine_memmap_request memmap_req = {
     .id = LIMINE_MEMMAP_REQUEST,
     .revision = 0
 };
