@@ -70,7 +70,6 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             FLD6 = 0x00
             //! io-read: pio 8b 0xB000 = 0x55
             //! io-write: pio 8b 0xB000 = 0xD5
-            //! io-read: pio 8b 0xB001 = 0x55
             //! io-write: pio 8b 0xB001 = 0xAA
             FLD8 = 0x155
 
