@@ -15,47 +15,42 @@ DefinitionBlock("out.aml", "DSDT", 1, "LAI", "LAI_TEST", 1)
             REGD,   8, 
             REGE,  16,
         }
+
+        OperationRegion (ID2F, SystemIO, 0xD00, 0x2)
+        Field (ID2F, ByteAcc, NoLock, Preserve) {
+            IDX2,   4,
+            DAT2,   8
+        }
+
+        IndexField (IDX2, DAT2, ByteAcc, NoLock, Preserve) {
+            RE2A,   8,
+            RE2B,   8
+        }
  
         Method(_INI)
         {
-            //! io-read: pio 8b 0xC00 = 0x0
             //! io-write: pio 8b 0xC00 = 0x2
-            //! io-read: pio 8b 0xC01 = 0x0
-
-            //! io-read: pio 8b 0xC00 = 0x0
-            //! io-write: pio 8b 0xC00 = 0x2
-            //! io-read: pio 8b 0xC01 = 0x0
             //! io-write: pio 8b 0xC01 = 0xAA
             REGC = 0xAA
 
-            //! io-read: pio 8b 0xC00 = 0x0
             //! io-write: pio 8b 0xC00 = 0x0
-            //! io-read: pio 8b 0xC01 = 0x0
-
-            //! io-read: pio 8b 0xC00 = 0x0
-            //! io-write: pio 8b 0xC00 = 0x0
-            //! io-read: pio 8b 0xC01 = 0x0
             //! io-write: pio 8b 0xC01 = 0x55
             REGA = 0x55
 
-            //! io-read: pio 8b 0xC00 = 0x0
             //! io-write: pio 8b 0xC00 = 0x4
-            //! io-read: pio 8b 0xC01 = 0x0
-
-            //! io-read: pio 8b 0xC00 = 0x0
-            //! io-write: pio 8b 0xC00 = 0x4
-            //! io-read: pio 8b 0xC01 = 0x0
             //! io-write: pio 8b 0xC01 = 0xCD
 
-            //! io-read: pio 8b 0xC00 = 0x0
             //! io-write: pio 8b 0xC00 = 0x5
-            //! io-read: pio 8b 0xC01 = 0x0
-
-            //! io-read: pio 8b 0xC00 = 0x0
-            //! io-write: pio 8b 0xC00 = 0x5
-            //! io-read: pio 8b 0xC01 = 0x0
             //! io-write: pio 8b 0xC01 = 0xAB
             REGE = 0xABCD
+
+            //! io-read: pio 8b 0xD00 = 0x00
+            //! io-write: pio 8b 0xD00 = 0x01
+            //! io-read: pio 8b 0xD00 = 0x01
+            //! io-write: pio 8b 0xD00 = 0xA1
+            //! io-read: pio 8b 0xD01 = 0x00
+            //! io-write: pio 8b 0xD01 = 0x0A
+            RE2B = 0xAA
         }
     }
 }
